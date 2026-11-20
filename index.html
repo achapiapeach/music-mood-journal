@@ -2472,9 +2472,10 @@
   }
 
   /* 목표 좌표: 이어가기 / 끌어올리기(긍정·활기) / 진정시키기(에너지 낮추기) */
+  /* 목표 좌표: 이어가기 / 끌어올리기(긍정 쪽으로 최소 +0.35) / 진정시키기(차분한 쪽으로) */
   function goalTarget(v, a, goal) {
-    if (goal === 'lift') return { v: clamp(v + 0.55, -1, 1), a: clamp(a + 0.40, -1, 1) };
-    if (goal === 'calm') return { v: clamp(v + 0.25, -1, 1), a: clamp(a - 0.55, -1, 1) };
+    if (goal === 'lift') return { v: clamp(Math.max(v + 0.55, 0.35), -1, 1), a: clamp(Math.max(a + 0.35, -0.10), -1, 1) };
+    if (goal === 'calm') return { v: clamp(Math.max(v + 0.25, 0.20), -1, 1), a: clamp(Math.min(a - 0.55, -0.35), -1, 1) };
     return { v: v, a: a };
   }
 
