@@ -1002,17 +1002,20 @@
      ============================================================ */
   /* 기분 8개: 좌표(v = 긍정도, a = 에너지)는 Russell(1980) 2축 모델 기준 */
   var MOODS = [
-    { id: 'happy',   label: '행복',     emoji: '😊', color: '#e0a13c', v:  0.75, a:  0.45, desc: '웃음이 나고 마음이 가벼움' },
-    { id: 'flutter', label: '설렘',     emoji: '💗', color: '#dd6f92', v:  0.65, a:  0.80, desc: '두근거리고 들떠 있음' },
-    { id: 'calm',    label: '평온',     emoji: '🌿', color: '#6fa07f', v:  0.60, a: -0.65, desc: '편안하고 고요함' },
-    { id: 'soft',    label: '몽글몽글', emoji: '☁️', color: '#9b8ed0', v:  0.45, a: -0.25, desc: '포근하고 살짝 젖어 있음' },
-    { id: 'tired',   label: '지침',     emoji: '🥲', color: '#8f93a6', v: -0.15, a: -0.70, desc: '기운이 빠지고 늘어짐' },
-    { id: 'blue',    label: '우울',     emoji: '🌧️', color: '#5f86ae', v: -0.65, a: -0.55, desc: '가라앉고 쓸쓸함' },
-    { id: 'angry',   label: '화남',     emoji: '🔥', color: '#cf6b58', v: -0.70, a:  0.75, desc: '부글거리고 답답함' },
-    { id: 'focus',   label: '집중',     emoji: '🎧', color: '#4f939c', v:  0.10, a:  0.45, desc: '몰입하고 차분히 깨어 있음' }
+    { id: 'happy',   label: '행복',     emoji: '😊', color: '#e0a13c', quad: 'Q1', v:  0.75, a:  0.45, desc: '웃음이 나고 마음이 가벼움' },
+    { id: 'flutter', label: '설렘',     emoji: '💗', color: '#dd6f92', quad: 'Q1', v:  0.65, a:  0.80, desc: '두근거리고 들떠 있음' },
+    { id: 'calm',    label: '평온',     emoji: '🌿', color: '#6fa07f', quad: 'Q4', v:  0.60, a: -0.65, desc: '편안하고 고요함' },
+    { id: 'soft',    label: '몽글몽글', emoji: '☁️', color: '#9b8ed0', quad: 'Q4', v:  0.45, a: -0.25, desc: '포근하고 살짝 젖어 있음' },
+    { id: 'tired',   label: '지침',     emoji: '🥲', color: '#8f93a6', quad: 'Q3', v: -0.15, a: -0.70, desc: '기운이 빠지고 늘어짐' },
+    { id: 'blue',    label: '우울',     emoji: '🌧️', color: '#5f86ae', quad: 'Q3', v: -0.65, a: -0.55, desc: '가라앉고 쓸쓸함' },
+    { id: 'angry',   label: '화남',     emoji: '🔥', color: '#cf6b58', quad: 'Q2', v: -0.70, a:  0.75, desc: '부글거리고 답답함' },
+    { id: 'focus',   label: '집중',     emoji: '🎧', color: '#4f939c', quad: 'Q1', v:  0.10, a:  0.45, desc: '몰입하고 차분히 깨어 있음' }
   ];
   var MOOD_BY_ID = {};
-  MOODS.forEach(function (m) { MOOD_BY_ID[m.id] = m; });
+  MOODS.forEach(function (m) {
+    if (!m.quad) m.quad = quadOf(m.v, m.a);
+    MOOD_BY_ID[m.id] = m;
+  });
 
   /* 사분면: Russell 모델의 4분면. 표 순서는 2축(가로=긍정도, 세로=에너지) 배치 순 */
   var QUADS = [
