@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#faf6f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121115" media="(prefers-color-scheme: dark)">
+<meta name="description" content="YouTube Music 시청 기록(Google Takeout)을 분석하고, 그날의 감정을 노래와 함께 기록하는 다이어리. 올린 파일은 브라우저 안에서만 처리됩니다.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23b8715f'/%3E%3Ctext x='32' y='45' font-size='34' text-anchor='middle' fill='%23fff'%3E%E2%99%AA%3C/text%3E%3C/svg%3E">
+<title>노래로 남긴 마음 · 음악 감정 일기</title>
+<style>
+  /* ---------- tokens ---------- */
+  :root{
+    --bg:#faf6f1;
+    --surface:#fffdfa;
+    --surface-2:#f6efe8;
+    --ink:#2a2521;
+    --ink-soft:#5b534c;
+    --muted:#8d8278;
+    --line:#e9dfd4;
+    --line-strong:#d8cabc;
+    --accent:#b8715f;
+    --accent-ink:#8d4f40;
+    --accent-soft:#f4e4dc;
+    --accent-2:#8f7aa8;
+    --track:#e8dcd0;
+    --shadow:0 18px 40px -30px rgba(70,45,30,.55), 0 2px 6px -4px rgba(70,45,30,.18);
+    --bg-blur:rgba(250,246,241,.82);
+    --bg-blur-strong:rgba(250,246,241,.94);
+    --radius:22px;
+    --radius-sm:14px;
+    --sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Noto Sans KR",sans-serif;
+  }
+  html[data-theme="dark"]{
+    --bg:#121115;
+    --surface:#1b191e;
+    --surface-2:#242128;
+    --ink:#efe9e2;
+    --ink-soft:#cdc4bb;
+    --muted:#9b918a;
+    --line:#2d2a31;
+    --line-strong:#3e3841;
+    --accent:#e0a094;
+    --accent-ink:#f2c2b6;
+    --accent-soft:#33282a;
+    --accent-2:#b9a0d4;
+    --track:#3a333b;
+    --shadow:0 20px 50px -34px rgba(0,0,0,.9), 0 2px 8px -4px rgba(0,0,0,.5);
+    --bg-blur:rgba(18,17,21,.82);
+    --bg-blur-strong:rgba(18,17,21,.94);
+  }
+
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:15px;
+    line-height:1.6;
+    letter-spacing:-.01em;
+    word-break:keep-all;
+    -webkit-font-smoothing:antialiased;
+    overflow-wrap:anywhere;
+  }
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0 0 auto 0;
+    height:460px;
+    pointer-events:none;
+    background:
+      radial-gradient(60% 80% at 12% 0%, var(--accent-soft) 0%, transparent 62%),
+      radial-gradient(45% 60% at 92% 4%, rgba(143,122,168,.13) 0%, transparent 70%);
+    opacity:.9;
+    z-index:0;
+  }
+  [hidden]{display:none !important}
+  button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+  a{color:var(--accent-ink)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+  .wrap{position:relative;z-index:1;max-width:1020px;margin:0 auto;padding:0 18px 80px}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:30;
+    backdrop-filter:saturate(160%) blur(14px);
+    -webkit-backdrop-filter:saturate(160%) blur(14px);
+    background:var(--bg-blur);
+    border-bottom:1px solid transparent;
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .topbar.is-stuck{border-bottom-color:var(--line);background:var(--bg-blur-strong)}
+  .topbar-inner{
+    max-width:1020px;margin:0 auto;padding:12px 18px;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+  }
+  .brand{display:flex;align-items:center;gap:9px;min-width:0}
+  .brand-mark{
+    width:30px;height:30px;border-radius:10px;flex:none;
+    background:linear-gradient(150deg,var(--accent),var(--accent-2));
+    display:grid;place-items:center;color:#fff;font-size:14px;
+    box-shadow:0 6px 14px -10px rgba(120,70,50,.8);
+  }
+  .brand-name{font-size:13.5px;font-weight:650;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brand-sub{font-size:11.5px;color:var(--muted);margin-left:2px}
+  .icon-btn{
+    width:38px;height:38px;border-radius:50%;
+    border:1px solid var(--line);background:var(--surface);
+    display:grid;place-items:center;font-size:15px;line-height:1;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .icon-btn:hover{border-color:var(--line-strong);transform:translateY(-1px)}
+  .icon-btn:active{transform:scale(.95)}
+
+  /* ---------- hero ---------- */
+  .hero{padding:26px 0 4px}
+  .hero-eyebrow{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--accent-ink);font-weight:700;
+  }
+  .hero h1{
+    font-size:clamp(27px,6.8vw,40px);
+    line-height:1.26;letter-spacing:-.05em;
+    margin:10px 0 10px;font-weight:750;
+  }
+  .hero h1 em{font-style:normal;color:var(--accent-ink)}
+  .hero p{margin:0;color:var(--ink-soft);font-size:14px;max-width:42ch}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;color:var(--ink-soft);
+    background:var(--surface);border:1px solid var(--line);
+    padding:5px 11px;border-radius:999px;
+  }
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none}
+
+  /* ---------- tabs ---------- */
+  .tabs{
+    position:sticky;top:62px;z-index:20;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:4px;
+    max-width:520px;margin:22px auto 20px;padding:4px;
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:999px;box-shadow:var(--shadow);
+  }
+  .tab{
+    padding:9px 6px;border-radius:999px;
+    font-size:13.5px;font-weight:600;color:var(--muted);
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    transition:background .18s ease,color .18s ease;
+  }
+  .tab[aria-selected="true"]{background:var(--accent-soft);color:var(--accent-ink)}
+  .tab:hover{color:var(--ink-soft)}
+
+  /* ---------- cards ---------- */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+    box-shadow:var(--shadow);
+  }
+  .card + .card{margin-top:16px}
+  .card-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:4px}
+  .card-title{font-size:15px;font-weight:700;letter-spacing:-.01em}
+  .card-desc{font-size:12.5px;color:var(--muted);margin:2px 0 14px}
+  .section-label{
+    font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);margin:26px 4px 10px;
+  }
+
+  /* ---------- intake ---------- */
+  .intake{border-style:dashed;border-color:var(--line-strong);text-align:center;padding:28px 20px}
+  .intake .big-ico{font-size:26px;line-height:1;margin-bottom:6px}
+  .intake h2{font-size:19px;margin:8px 0 6px;font-weight:700;letter-spacing:-.035em}
+  .intake p{margin:0 auto 16px;color:var(--ink-soft);font-size:13.5px;max-width:38ch}
+  .intake p.hint{margin:16px auto 0;color:var(--muted);font-size:12px;max-width:44ch}
+  .btn-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    padding:10px 16px;border-radius:12px;font-size:13.5px;font-weight:650;
+    border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);
+    transition:transform .12s ease, background .15s ease, border-color .15s ease;
+    text-decoration:none;
+  }
+  .btn:hover{border-color:var(--accent);color:var(--accent-ink)}
+  .btn:active{transform:scale(.985)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover{background:var(--accent-ink);border-color:var(--accent-ink);color:#fff}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--muted);padding:8px 10px}
+  .btn.ghost:hover{color:var(--accent-ink);background:var(--accent-soft)}
+  .btn.small{padding:7px 12px;font-size:12.5px;border-radius:10px}
+  .btn.danger:hover{border-color:#c0554a;color:#c0554a}
+
+  .intake.loaded{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    text-align:left;padding:14px 16px;border-style:solid;border-color:var(--line);
+  }
+  .intake.loaded .file-meta{font-size:13px;min-width:0}
+  .intake.loaded .file-name{font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .intake.loaded .file-sub{color:var(--muted);font-size:12px;margin-top:1px}
+
+  .hint{font-size:12px;color:var(--muted);margin:14px auto 0;max-width:44ch}
+  details.howto{margin-top:20px;text-align:left;border-top:1px solid var(--line);padding-top:12px}
+  details.howto summary{
+    cursor:pointer;font-size:12.5px;color:var(--ink-soft);font-weight:600;
+    list-style:none;display:flex;align-items:center;gap:6px;
+  }
+  details.howto summary::-webkit-details-marker{display:none}
+  details.howto summary::before{content:"＋";color:var(--accent);font-weight:700}
+  details.howto[open] summary::before{content:"－"}
+  details.howto ol{margin:10px 0 0;padding-left:18px;font-size:12.5px;color:var(--ink-soft);line-height:1.75}
+  details.howto code{
+    background:var(--surface-2);border:1px solid var(--line);
+    border-radius:5px;padding:1px 5px;font-size:11.5px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+
+  /* ---------- summary ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .stat{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--radius-sm);padding:14px 14px 12px;
+    min-width:0;
+  }
+  .stat-k{font-size:11.5px;color:var(--muted);letter-spacing:.02em}
+  .stat-v{font-size:22px;font-weight:700;letter-spacing:-.03em;margin-top:3px;line-height:1.25}
+  .stat-v small{font-size:12px;font-weight:600;color:var(--muted);margin-left:2px}
+  .stat-s{font-size:11.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* ---------- hour chart ---------- */
+  .chart{margin-top:6px}
+  .hours{display:flex;align-items:flex-end;gap:3px;height:150px}
+  .hbar{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;position:relative}
+  .hbar-fill{
+    width:100%;border-radius:4px 4px 3px 3px;min-height:2px;
+    background:var(--accent);opacity:.42;
+    transition:height .55s cubic-bezier(.22,1,.36,1), opacity .15s ease;
+  }
+  .hbar.peak .hbar-fill{opacity:1;background:linear-gradient(180deg,var(--accent),var(--accent-ink))}
+  .hbar:hover .hbar-fill{opacity:.9}
+  .hbar-val{
+    position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);
+    font-size:10.5px;font-weight:700;color:var(--accent-ink);
+    background:var(--surface);border:1px solid var(--line);border-radius:6px;
+    padding:1px 5px;white-space:nowrap;opacity:0;pointer-events:none;
+    transition:opacity .12s ease;
+  }
+  .hbar:hover .hbar-val,.hbar:focus-within .hbar-val{opacity:1}
+  .haxis{display:flex;gap:3px;margin-top:7px}
+  .haxis span{flex:1;text-align:center;font-size:10px;color:var(--muted);overflow:hidden;white-space:nowrap}
+  .chart-note{
+    display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+    margin-top:12px;font-size:12.5px;color:var(--ink-soft);
+  }
+  .chart-note strong{color:var(--accent-ink);font-weight:700}
+
+  /* ---------- artist bars ---------- */
+  .arow{display:grid;gap:5px;padding:9px 0;border-top:1px solid var(--line)}
+  .arow:first-of-type{border-top:0}
+  .arow-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:13.5px}
+  .arow-name{font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .arow-count{color:var(--muted);font-size:12px;flex:none;font-variant-numeric:tabular-nums}
+  .abar{height:7px;border-radius:99px;background:var(--track);overflow:hidden}
+  .abar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-2),var(--accent));opacity:.85}
+
+  /* ---------- track list ---------- */
+  .tracks{display:grid;gap:2px;margin-top:4px}
+  .trow{
+    display:grid;grid-template-columns:26px minmax(0,1fr) auto;
+    align-items:center;gap:10px;width:100%;text-align:left;
+    padding:9px 8px;border-radius:11px;
+    transition:background .14s ease;
+  }
+  .trow:hover{background:var(--surface-2)}
+  .trank{
+    font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;
+    text-align:right;font-weight:600;
+  }
+  .trow:nth-child(-n+3) .trank{color:var(--accent-ink);font-weight:800}
+  .tmeta{min-width:0}
+  .ttitle{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tartist{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .tright{text-align:right;flex:none}
+  .tcount{display:block;font-size:12.5px;font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .tlast{display:block;font-size:10.5px;color:var(--muted);white-space:nowrap;margin-top:1px}
+  .list-foot{font-size:11.5px;color:var(--muted);margin:10px 4px 0}
+
+  /* ---------- forms ---------- */
+  .field{margin-bottom:13px}
+  .field > label{display:block;font-size:12px;font-weight:650;color:var(--ink-soft);margin-bottom:5px}
+  .field .hintline{font-size:11.5px;color:var(--muted);margin-top:4px}
+  input[type="text"],input[type="date"],select,textarea{
+    width:100%;padding:11px 12px;font:inherit;font-size:14px;
+    color:var(--ink);background:var(--surface);
+    border:1px solid var(--line-strong);border-radius:11px;
+    -webkit-appearance:none;appearance:none;
+  }
+  input[type="date"]{min-height:44px}
+  input::placeholder{color:var(--muted)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:6px 11px;border-radius:999px;
+    border:1px solid var(--line-strong);background:var(--surface);
+    font-size:12.5px;font-weight:600;color:var(--ink-soft);
+    transition:all .14s ease;
+  }
+  .chip .em{font-size:13px;line-height:1}
+  .chip:hover{border-color:var(--accent)}
+  .chip[aria-pressed="true"]{
+    background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink);
+  }
+  .chip .cnt{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+  .intensity{display:flex;align-items:center;gap:10px}
+  .dots{display:flex;gap:5px}
+  .dots i{width:9px;height:9px;border-radius:50%;background:var(--track);transition:background .15s ease,transform .15s ease}
+  .dots i.on{background:var(--accent);transform:scale(1.12)}
+  input[type="range"]{
+    -webkit-appearance:none;appearance:none;width:100%;height:26px;background:transparent;
+  }
+  input[type="range"]::-webkit-slider-runnable-track{height:5px;border-radius:99px;background:var(--track)}
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;
+    background:var(--accent);border:3px solid var(--surface);margin-top:-8px;
+    box-shadow:0 1px 4px rgba(0,0,0,.2);
+  }
+  input[type="range"]::-moz-range-track{height:5px;border-radius:99px;background:var(--track)}
+  input[type="range"]::-moz-range-thumb{width:20px;height:20px;border:3px solid var(--surface);border-radius:50%;background:var(--accent)}
+  .range-label{font-size:12.5px;color:var(--ink-soft);min-width:74px;text-align:right;font-weight:650}
+
+  .form-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .save-note{font-size:11.5px;color:var(--muted);margin-left:auto}
+
+  /* ---------- entries ---------- */
+  .entries{display:grid;gap:10px}
+  .daygroup + .daygroup{margin-top:6px}
+  .dayhead{
+    display:flex;align-items:center;gap:8px;
+    font-size:12px;font-weight:700;color:var(--ink-soft);margin:16px 2px 8px;
+  }
+  .dayhead .line{flex:1;height:1px;background:var(--line)}
+  .dayhead .today{color:var(--accent-ink)}
+  .entry{
+    border:1px solid var(--line);border-radius:16px;padding:13px 14px;
+    background:var(--surface);display:grid;gap:7px;
+    transition:border-color .15s ease;
+  }
+  .entry:hover{border-color:var(--line-strong)}
+  .entry-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .entry-song{font-size:13.5px;font-weight:650;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .entry-artist{font-size:11.5px;color:var(--muted)}
+  .entry-memo{
+    font-size:13px;color:var(--ink-soft);line-height:1.55;
+    border-left:2px solid var(--accent-soft);padding-left:10px;margin:1px 0 0;
+  }
+  .entry-actions{display:flex;gap:4px;margin-left:auto;flex:none}
+  .mini{
+    font-size:11px;color:var(--muted);padding:3px 7px;border-radius:7px;
+    border:1px solid transparent;
+  }
+  .mini:hover{background:var(--surface-2);color:var(--accent-ink);border-color:var(--line)}
+  .badge-intensity{display:inline-flex;gap:2px;align-items:center;margin-left:2px}
+  .badge-intensity i{width:4px;height:9px;border-radius:2px;background:var(--track)}
+  .badge-intensity i.on{background:var(--accent)}
+
+  .empty{
+    text-align:center;color:var(--muted);font-size:13px;
+    padding:26px 14px;border:1px dashed var(--line-strong);border-radius:16px;
+  }
+  .empty .em{display:block;font-size:22px;margin-bottom:6px;opacity:.8}
+
+  /* ---------- collection ---------- */
+  .moodgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .moodtile{
+    border:1px solid var(--line);border-radius:14px;background:var(--surface);
+    padding:12px 10px;text-align:left;display:grid;gap:2px;
+    transition:all .15s ease;
+  }
+  .moodtile:hover{border-color:var(--line-strong);transform:translateY(-1px)}
+  .moodtile[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+  .moodtile .em{font-size:17px;line-height:1.1}
+  .moodtile .nm{font-size:12.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .moodtile .ct{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .mood-detail{margin-top:16px;border-top:1px solid var(--line);padding-top:16px}
+  .mood-detail-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .mood-detail-head .em{font-size:22px}
+  .mood-detail-head h3{margin:0;font-size:16px;font-weight:700;letter-spacing:-.01em}
+  .mood-detail-head .sub{font-size:12px;color:var(--muted)}
+  .songbars{display:grid;gap:7px}
+  .songbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start;font-size:13px;padding-bottom:6px}
+  .songbar .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .songbar .nm b{font-weight:650}
+  .songbar .nm span{color:var(--muted);font-size:11.5px}
+  .songbar .ct{font-size:11.5px;color:var(--accent-ink);font-weight:700;font-variant-numeric:tabular-nums}
+  .memos{display:grid;gap:8px;margin-top:4px}
+  .memo-item{display:flex;gap:9px;font-size:13px;color:var(--ink-soft);line-height:1.55}
+  .memo-item time{font-size:11px;color:var(--muted);flex:none;padding-top:2px;font-variant-numeric:tabular-nums}
+  .counter{font-size:12px;color:var(--muted);margin:14px 0 0}
+  .filterbar{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    margin:2px 0 10px;padding:8px 10px;border-radius:11px;
+    background:var(--accent-soft);font-size:12.5px;color:var(--accent-ink);font-weight:600;
+  }
+  .filterbar .x{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--accent-ink);opacity:.8}
+  .filterbar .x:hover{opacity:1;text-decoration:underline}
+
+  /* ---------- data section ---------- */
+  .data-row{display:flex;flex-wrap:wrap;gap:8px}
+  .data-row .btn{flex:1 1 auto}
+  .storage-note{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.65}
+  .storage-note b{color:var(--ink-soft);font-weight:650}
+
+  /* ---------- toast ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);
+    background:var(--ink);color:var(--bg);
+    padding:11px 18px;border-radius:999px;font-size:13px;font-weight:600;
+    box-shadow:0 14px 30px -16px rgba(0,0,0,.6);
+    opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;
+    z-index:60;max-width:calc(100vw - 32px);text-align:center;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  html[data-theme="dark"] .toast{background:var(--accent-soft);color:var(--ink)}
+
+  /* ---------- footer ---------- */
+  .foot{
+    margin-top:34px;padding-top:18px;border-top:1px solid var(--line);
+    font-size:11.5px;color:var(--muted);line-height:1.7;
+  }
+  .foot b{color:var(--ink-soft);font-weight:650}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:860px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .moodgrid{grid-template-columns:repeat(4,1fr)}
+  }
+  @media (max-width:620px){
+    body{font-size:14.5px}
+    .wrap{padding:0 14px 72px}
+    .topbar-inner{padding:10px 14px}
+    .hero{padding:20px 0 2px}
+    .hero p{font-size:13.5px}
+    .tabs{top:58px;margin:18px 0 16px}
+    .tab{font-size:12.5px;padding:8px 2px;gap:4px}
+    .card{padding:16px;border-radius:18px}
+    .stats{gap:8px}
+    .stat{padding:12px}
+    .stat-v{font-size:19px}
+    .hours{height:126px;gap:2px}
+    .haxis{gap:2px}
+    .moodgrid{grid-template-columns:repeat(4,1fr);gap:6px}
+    .moodtile{padding:10px 6px}
+    .moodtile .em{font-size:16px}
+    .moodtile .nm{font-size:11.5px}
+    .grid-2{grid-template-columns:1fr}
+    .range-label{min-width:64px}
+    .intake.loaded{flex-direction:column;align-items:stretch;gap:10px}
+    .save-note{margin-left:0;width:100%}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition-duration:.01ms !important;animation-duration:.01ms !important}
+  }
+  @media (min-width:760px){
+    #moodForm{max-width:640px}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar" id="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">♪</span>
+      <span class="brand-name">노래로 남긴 마음</span>
+      <span class="brand-sub">음악 감정 일기</span>
+    </div>
+    <button class="icon-btn" id="themeToggle" type="button" aria-label="다크 모드로 전환" title="다크 모드로 전환">
+      <span id="themeIcon" aria-hidden="true">☾</span>
+    </button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="hero">
+    <span class="hero-eyebrow">YOUTUBE MUSIC × 마음 기록</span>
+    <h1>무엇을, 언제, <em>왜</em> 들었는지</h1>
+    <p>내가 가장 많이 반복한 노래와 그 노래를 듣던 시간, 그리고 그때의 마음을 한곳에 모아 둡니다.</p>
+    <div class="hero-meta" id="heroMeta"></div>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="화면 전환">
+    <button class="tab" role="tab" id="tab-analyze" data-tab="analyze" aria-selected="true" aria-controls="view-analyze" type="button">분석</button>
+    <button class="tab" role="tab" id="tab-record" data-tab="record" aria-selected="false" aria-controls="view-record" type="button">감정 기록</button>
+    <button class="tab" role="tab" id="tab-collection" data-tab="collection" aria-selected="false" aria-controls="view-collection" type="button">모아보기</button>
+  </nav>
+
+  <!-- ============ ANALYZE ============ -->
+  <section id="view-analyze" role="tabpanel" aria-labelledby="tab-analyze">
+
+    <div class="card intake" id="intake">
+      <div class="big-ico" aria-hidden="true">♫</div>
+      <h2>시청 기록을 올려 주세요</h2>
+      <p>구글 테이크아웃에서 받은 <b>watch-history.json</b>을 그대로 넣으면, YouTube Music 기록만 골라 분석해요.</p>
+      <div class="btn-row">
+        <button class="btn primary" type="button" id="pickFileBtn">내 watch-history.json 올리기</button>
+        <button class="btn" type="button" id="sampleBtn">샘플로 둘러보기</button>
+      </div>
+      <p class="hint">기록이 없어도 괜찮아요 — 샘플로 먼저 둘러보고, 감정 기록은 지금부터 쌓아도 됩니다.</p>
+      <details class="howto">
+        <summary>기록 파일은 어떻게 받나요?</summary>
+        <ol>
+          <li><a href="https://takeout.google.com" target="_blank" rel="noopener">takeout.google.com</a> → <b>모두 선택 해제</b> 후 <b>YouTube 및 YouTube Music</b>만 선택</li>
+          <li><b>여러 형식</b> → <code>history</code> 항목을 <b>JSON</b>으로 변경 (기본값은 HTML이에요)</li>
+          <li>내보내기 → 도착한 ZIP 압축 해제 → <code>Takeout/YouTube and YouTube Music/history/watch-history.json</code></li>
+          <li>그 파일을 여기에 올리면 끝! (파일은 브라우저 안에서만 처리되고 어디에도 전송되지 않아요)</li>
+        </ol>
+        <p class="hint" style="margin:8px 0 0;text-align:left">아이폰은 <b>파일</b> 앱에서 내려받은 ZIP을 탭하면 압축이 풀려요.</p>
+      </details>
+    </div>
+
+    <div id="dashboard" hidden>
+      <div class="section-label">한눈에 보기</div>
+      <div class="stats" id="stats"></div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-head">
+          <h2 class="card-title">시간대별 청취</h2>
+        </div>
+        <p class="card-desc" id="hoursDesc">하루 중 언제 노래를 가장 많이 틀었는지</p>
+        <div class="chart">
+          <div class="hours" id="hoursChart" role="img" aria-label="시간대별 청취 횟수 막대 차트"></div>
+          <div class="haxis" id="hoursAxis" aria-hidden="true"></div>
+        </div>
+        <div class="chart-note" id="hoursNote"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">가장 많이 반복한 곡</h2>
+          <span class="card-desc" style="margin:0">TOP 15</span>
+        </div>
+        <p class="card-desc">곡을 누르면 그 노래로 감정을 남길 수 있어요.</p>
+        <div class="tracks" id="topTracks"></div>
+        <p class="list-foot" id="tracksFoot"></p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">자주 듣는 아티스트</h2>
+          <span class="card-desc" style="margin:0">TOP 10</span>
+        </div>
+        <div id="topArtists" style="margin-top:6px"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2 class="card-title">데이터</h2></div>
+        <p class="card-desc">감정 기록은 이 브라우저에 저장돼요. 기기를 바꾸거나 백업하려면 내보내기를 써 주세요.</p>
+        <div class="data-row">
+          <button class="btn small" type="button" id="exportBtn">내 기록 내보내기</button>
+          <button class="btn small" type="button" id="importBtn">기록 가져오기</button>
+          <button class="btn small" type="button" id="resetBtn">기록 모두 지우기</button>
+        </div>
+        <p class="storage-note" id="storageNote"></p>
+      </div>
+    </div>
+
+    <div id="emptyState" style="margin-top:16px">
+      <div class="card" style="text-align:center;padding:24px 18px">
+        <p style="margin:0 0 4px;font-size:13.5px;color:var(--ink-soft)">기록 없이도 감정은 남길 수 있어요.</p>
+        <p style="margin:0 0 14px;font-size:12.5px;color:var(--muted)">날짜와 그날의 마음을 적어 두면, 나중에 그 시절의 플레이리스트를 되돌아볼 수 있어요.</p>
+        <div class="btn-row">
+          <button class="btn" type="button" id="goRecordBtn">감정 기록하러 가기</button>
+          <button class="btn ghost" type="button" id="importBtnEmpty">이전에 내보낸 기록 불러오기</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RECORD ============ -->
+  <section id="view-record" role="tabpanel" aria-labelledby="tab-record" hidden>
+    <div class="card" id="formCard">
+      <div class="card-head">
+        <h2 class="card-title" id="formTitle">오늘의 마음 남기기</h2>
+        <button class="btn ghost small" type="button" id="cancelEditBtn" hidden>수정 취소</button>
+      </div>
+      <p class="card-desc">어떤 노래를 들었을 때, 기분은 어땠나요?</p>
+
+      <form id="moodForm" novalidate>
+        <div class="grid-2">
+          <div class="field">
+            <label for="fDate">날짜</label>
+            <input type="date" id="fDate" name="date" required>
+          </div>
+          <div class="field">
+            <label for="fArtist">아티스트 <span style="font-weight:500;color:var(--muted)">(선택)</span></label>
+            <input type="text" id="fArtist" name="artist" placeholder="예: 문라이트 클럽" autocomplete="off" maxlength="60">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="fSong">곡 <span style="font-weight:500;color:var(--muted)">(선택)</span></label>
+          <input type="text" id="fSong" name="song" placeholder="노래 제목을 적거나, 아래에서 골라 보세요" list="songList" autocomplete="off" maxlength="80">
+          <datalist id="songList"></datalist>
+          <div class="chips" id="quickSongs" style="margin-top:8px"></div>
+          <div class="hintline" id="songHint"></div>
+        </div>
+
+        <div class="field">
+          <label>그때의 마음 <span style="font-weight:500;color:var(--muted)">(여러 개 고를 수 있어요)</span></label>
+          <div class="chips" id="moodChips" role="group" aria-label="감정 선택"></div>
+          <div class="hintline" id="moodHint">한 가지 이상 골라 주세요.</div>
+        </div>
+
+        <div class="field">
+          <label for="fIntensity">강도</label>
+          <div class="intensity">
+            <input type="range" id="fIntensity" name="intensity" min="1" max="5" step="1" value="3" aria-describedby="rangeLabel">
+            <span class="range-label" id="rangeLabel">보통</span>
+            <span class="dots" id="rangeDots" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="fMemo">한 줄 메모 <span style="font-weight:500;color:var(--muted)">(선택)</span></label>
+          <input type="text" id="fMemo" name="memo" placeholder="예: 퇴근길에 계속 반복해서 들었다" maxlength="90">
+        </div>
+
+        <div class="form-actions">
+          <button class="btn primary" type="submit" id="saveBtn">기록 저장</button>
+          <span class="save-note" id="saveNote">이 브라우저에만 저장돼요.</span>
+        </div>
+      </form>
+    </div>
+
+    <div class="section-label">최근 감정 기록</div>
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">타임라인</h2>
+        <span class="card-desc" id="entryCount" style="margin:0"></span>
+      </div>
+      <div class="filterbar" id="filterBar" hidden>
+        <span id="filterLabel"></span>
+        <button class="x" type="button" id="clearFilterBtn">전체 보기</button>
+      </div>
+      <div id="timeline"></div>
+      <div style="text-align:center;margin-top:12px">
+        <button class="btn ghost small" type="button" id="moreBtn" hidden>더 보기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COLLECTION ============ -->
+  <section id="view-collection" role="tabpanel" aria-labelledby="tab-collection" hidden>
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">감정별 모아보기</h2>
+      </div>
+      <p class="card-desc">감정을 고르면, 그 마음이었을 때 주로 들은 노래와 남긴 메모를 모아 볼 수 있어요.</p>
+      <div class="moodgrid" id="moodGrid" role="group" aria-label="감정 선택"></div>
+      <div class="mood-detail" id="moodDetail"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2 class="card-title">데이터</h2></div>
+      <p class="card-desc">감정 기록은 이 브라우저에 저장돼요. 기기를 바꾸거나 백업하려면 내보내기를 써 주세요.</p>
+      <div class="data-row">
+        <button class="btn small" type="button" id="exportBtn2">내 기록 내보내기</button>
+        <button class="btn small" type="button" id="importBtn2">기록 가져오기</button>
+      </div>
+      <p class="storage-note" id="storageNote2"></p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <b>모든 데이터는 이 브라우저 안에만 있어요.</b> 업로드한 파일은 서버로 전송되지 않고, 감정 기록은 브라우저 저장소(localStorage)에 남습니다.
+    브라우저 기록을 지우면 함께 사라지니 가끔 <b>내보내기</b>로 백업해 두세요.<br>
+    시청 기록은 곡이 시작된 시각만 담고 있어요. 재생 시간은 기록되지 않고, 반복 횟수와 시간대만 정확히 알 수 있습니다.
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="fileInput" accept=".json,application/json" hidden>
+<input type="file" id="importInput" accept=".json,application/json" hidden>
+
+
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     0. 상수 / 상태
+     ============================================================ */
+  var MOODS = [
+    { id: 'happy',   label: '행복',     emoji: '😊', color: '#e0a13c' },
+    { id: 'flutter', label: '설렘',     emoji: '💗', color: '#dd6f92' },
+    { id: 'calm',    label: '평온',     emoji: '🌿', color: '#6fa07f' },
+    { id: 'soft',    label: '몽글몽글', emoji: '☁️', color: '#9b8ed0' },
+    { id: 'tired',   label: '지침',     emoji: '🥲', color: '#8f93a6' },
+    { id: 'blue',    label: '우울',     emoji: '🌧️', color: '#5f86ae' },
+    { id: 'angry',   label: '화남',     emoji: '🔥', color: '#cf6b58' },
+    { id: 'focus',   label: '집중',     emoji: '🎧', color: '#4f939c' }
+  ];
+  var MOOD_BY_ID = {};
+  MOODS.forEach(function (m) { MOOD_BY_ID[m.id] = m; });
+
+  var INTENSITY_LABEL = ['', '아주 옅게', '옅게', '보통', '진하게', '아주 진하게'];
+  var WEEKDAY = ['일', '월', '화', '수', '목', '금', '토'];
+
+  var KEY_ENTRIES = 'mmj.entries.v1';
+  var KEY_DATASET = 'mmj.dataset.v1';
+  var KEY_THEME = 'mmj.theme.v1';
+
+  var state = {
+    dataset: null,
+    entries: [],
+    activeTab: 'analyze',
+    activeMood: null,
+    filterMood: null,
+    editingId: null,
+    visibleEntries: 20,
+    selectedMoods: [],
+    storageOK: true
+  };
+
+  /* ============================================================
+     1. 유틸
+     ============================================================ */
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function pad2(n) { return n < 10 ? '0' + n : String(n); }
+  function ymd(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function todayYMD() { return ymd(new Date()); }
+  function dotDate(d) { return d.getFullYear() + '.' + pad2(d.getMonth() + 1) + '.' + pad2(d.getDate()); }
+  function koreanDate(s) {
+    var p = String(s).split('-');
+    if (p.length !== 3) return s;
+    var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    return Number(p[1]) + '월 ' + Number(p[2]) + '일 (' + WEEKDAY[d.getDay()] + ')';
+  }
+  function shortDate(s) {
+    var p = String(s).split('-');
+    if (p.length !== 3) return s;
+    return Number(p[1]) + '.' + pad2(Number(p[2]));
+  }
+  function hourLabel(h) {
+    if (h === 0) return '밤 12시';
+    if (h < 6) return '새벽 ' + h + '시';
+    if (h < 12) return '오전 ' + h + '시';
+    if (h === 12) return '낮 12시';
+    if (h < 18) return '오후 ' + (h - 12) + '시';
+    return '밤 ' + (h - 12) + '시';
+  }
+  function num(n) { return Number(n || 0).toLocaleString('ko-KR'); }
+
+  var toastTimer = null;
+  function toast(msg) {
+    var el = $('#toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2400);
+  }
+
+  function loadJSON(key, fallback) {
+    try {
+      var raw = localStorage.getItem(key);
+      if (!raw) return fallback;
+      return JSON.parse(raw);
+    } catch (e) { return fallback; }
+  }
+  function saveJSON(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (e) {
+      state.storageOK = false;
+      return false;
+    }
+  }
+
+  /* ============================================================
+     2. 테마
+     ============================================================ */
+  function applyTheme(theme) {
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var finalTheme = theme === 'auto' ? (prefersDark ? 'dark' : 'light') : theme;
+    document.documentElement.setAttribute('data-theme', finalTheme);
+    var icon = $('#themeIcon');
+    var btn = $('#themeToggle');
+    if (finalTheme === 'dark') {
+      icon.textContent = '☀';
+      btn.setAttribute('aria-label', '라이트 모드로 전환');
+      btn.title = '라이트 모드로 전환';
+    } else {
+      icon.textContent = '☾';
+      btn.setAttribute('aria-label', '다크 모드로 전환');
+      btn.title = '다크 모드로 전환';
+    }
+    btn.setAttribute('data-current', finalTheme);
+  }
+  function initTheme() {
+    var saved = null;
+    try { saved = localStorage.getItem(KEY_THEME); } catch (e) {}
+    if (saved !== 'light' && saved !== 'dark') {
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      saved = prefersDark ? 'dark' : 'light';
+    }
+    applyTheme(saved);
+  }
+
+  /* ============================================================
+     3. 시청 기록 파싱
+     ============================================================ */
+  var TITLE_PREFIXES = [
+    /^watched\s+/i,
+    /^listened to\s+/i,
+    /^viewed\s+/i,
+    /^동영상 시청:\s*/,
+    /^시청한 동영상:\s*/,
+    /^감상한 동영상:\s*/,
+    /^시청:\s*/,
+    /^들음:\s*/,
+    /^재생:\s*/,
+    /^angesehen:\s*/i,
+    /^vu[e]?\s*:\s*/i,
+    /^regard[ée]\s*:?\s*/i,
+    /^visto\s*:?\s*/i,
+    /^視聴済み:\s*/,
+    /^視聴:\s*/,
+    /^观看过\s*/,
+    /^已观看\s*:?\s*/
+  ];
+
+  /* 한국어 테이크아웃은 제목 끝에 "…을(를) 시청했습니다."가 붙는다 */
+  var TITLE_SUFFIXES = [
+    /\s*을\(를\)\s*시청했습니다\.?$/,
+    /\s*를\s*시청했습니다\.?$/,
+    /\s*시청했습니다\.?$/,
+    /\s+watched\.?$/i
+  ];
+
+  function cleanTitle(raw) {
+    var s = String(raw == null ? '' : raw).trim();
+    for (var i = 0; i < TITLE_PREFIXES.length; i++) {
+      var next = s.replace(TITLE_PREFIXES[i], '');
+      if (next !== s) { s = next; break; }
+    }
+    for (var j = 0; j < TITLE_SUFFIXES.length; j++) {
+      var cut = s.replace(TITLE_SUFFIXES[j], '');
+      if (cut !== s) { s = cut; break; }
+    }
+    return s.trim();
+  }
+
+  function cleanArtist(raw) {
+    var s = String(raw == null ? '' : raw).trim();
+    if (!s) return '';
+    if (/^https?:\/\//i.test(s) || s.indexOf('music.youtube.com') !== -1) return '';
+    s = s.replace(/\s*-\s*Topic$/i, '').trim();
+    s = s.replace(/\s*-\s*주제$/i, '').trim();
+    if (/^(unknown|알 수 없음|不明)$/i.test(s)) return '';
+    return s;
+  }
+
+  function isMusicRecord(item) {
+    if (!item || typeof item !== 'object') return false;
+    if (typeof item.header === 'string' && /music/i.test(item.header)) return true;
+    if (Array.isArray(item.products)) {
+      for (var i = 0; i < item.products.length; i++) {
+        if (/music/i.test(String(item.products[i]))) return true;
+      }
+    }
+    if (typeof item.titleUrl === 'string' && /music\.youtube\.com/i.test(item.titleUrl)) return true;
+    if (Array.isArray(item.activityControls)) {
+      for (var j = 0; j < item.activityControls.length; j++) {
+        if (/music/i.test(String(item.activityControls[j]))) return true;
+      }
+    }
+    if (Array.isArray(item.details)) {
+      for (var k = 0; k < item.details.length; k++) {
+        var nm = item.details[k] && item.details[k].name ? String(item.details[k].name) : '';
+        if (/music/i.test(nm)) return true;
+      }
+    }
+    return false;
+  }
+
+  /* watch-history.json 전체를 음악 재생 목록으로 변환 */
+  function parseWatchHistory(data) {
+    var list = null;
+    if (Array.isArray(data)) list = data;
+    else if (data && Array.isArray(data.items)) list = data.items;
+    else if (data && Array.isArray(data['watch-history'])) list = data['watch-history'];
+    if (!list) throw new Error('NOT_WATCH_HISTORY');
+
+    var plays = [];
+    var musicRecords = 0;
+    var ignored = 0;
+    var removed = 0;
+
+    for (var i = 0; i < list.length; i++) {
+      var item = list[i];
+      if (!item || typeof item !== 'object') { ignored++; continue; }
+      if (!isMusicRecord(item)) { ignored++; continue; }
+      musicRecords++;
+
+      var title = cleanTitle(item.title);
+      if (!title) { continue; }
+
+      // 제목이 지워진 기록(삭제된 동영상 등)은 곡으로 쓸 수 없어 제외
+      var placeholder = /removed|deleted video|private video|삭제된 동영상|비공개 동영상|이용할 수 없는 동영상/i.test(title);
+      if (placeholder) { removed++; continue; }
+
+      var artist = '';
+      if (Array.isArray(item.subtitles) && item.subtitles.length) {
+        artist = cleanArtist(item.subtitles[0] && item.subtitles[0].name);
+      }
+
+      var t = item.time ? new Date(item.time) : null;
+      if (!t || isNaN(t.getTime())) continue;
+
+      plays.push({ title: title, artist: artist, t: t });
+    }
+
+    return { plays: plays, musicRecords: musicRecords, ignored: ignored, removed: removed, total: list.length };
+  }
+
+  /* 재생 목록 → 집계 데이터 */
+  function aggregate(plays, source, sample) {
+    var byHour = new Array(24).fill(0);
+    var tracks = {};
+    var artists = {};
+    var days = {};
+    var first = null;
+    var last = null;
+
+    for (var i = 0; i < plays.length; i++) {
+      var p = plays[i];
+      var h = p.t.getHours();
+      byHour[h] += 1;
+
+      var key = (p.title || '').toLowerCase() + '\u0000' + (p.artist || '').toLowerCase();
+      var tk = tracks[key];
+      if (!tk) {
+        tk = { title: p.title, artist: p.artist || '', count: 0, last: p.t.getTime(), days: {} };
+        tracks[key] = tk;
+      }
+      tk.count += 1;
+      if (p.t.getTime() > tk.last) tk.last = p.t.getTime();
+
+      if (p.artist) {
+        var ak = p.artist.toLowerCase();
+        if (!artists[ak]) artists[ak] = { name: p.artist, count: 0, tracks: {} };
+        artists[ak].count += 1;
+        artists[ak].tracks[key] = 1;
+      }
+
+      var dkey = ymd(p.t);
+      days[dkey] = (days[dkey] || 0) + 1;
+
+      var ts = p.t.getTime();
+      if (first === null || ts < first) first = ts;
+      if (last === null || ts > last) last = ts;
+    }
+
+    var trackArr = Object.keys(tracks).map(function (k) {
+      return {
+        title: tracks[k].title,
+        artist: tracks[k].artist,
+        count: tracks[k].count,
+        last: new Date(tracks[k].last).toISOString()
+      };
+    }).sort(function (a, b) {
+      if (b.count !== a.count) return b.count - a.count;
+      return a.title.localeCompare(b.title, 'ko');
+    });
+
+    var artistArr = Object.keys(artists).map(function (k) {
+      return {
+        name: artists[k].name,
+        count: artists[k].count,
+        tracks: Object.keys(artists[k].tracks).length
+      };
+    }).sort(function (a, b) {
+      if (b.count !== a.count) return b.count - a.count;
+      return a.name.localeCompare(b.name, 'ko');
+    });
+
+    var topHour = 0;
+    for (var hh = 1; hh < 24; hh++) {
+      if (byHour[hh] > byHour[topHour]) topHour = hh;
+    }
+
+    return {
+      version: 1,
+      source: source || 'takeout',
+      sample: !!sample,
+      createdAt: new Date().toISOString(),
+      plays: plays.length,
+      uniqueTracks: trackArr.length,
+      uniqueArtists: artistArr.length,
+      hours: byHour,
+      topHour: topHour,
+      days: Object.keys(days).length,
+      first: first ? new Date(first).toISOString() : null,
+      last: last ? new Date(last).toISOString() : null,
+      tracks: trackArr.slice(0, 5000),
+      artists: artistArr.slice(0, 500)
+    };
+  }
+
+  /* ============================================================
+     4. 샘플 데이터
+     ============================================================ */
+  function mulberry32(seed) {
+    return function () {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  var SAMPLE_LIBRARY = [
+    ['새벽의 온도', '서하'], ['Slow Morning', '문라이트 클럽'], ['너의 계절', '유하'],
+    ['Night Bus', '문라이트 클럽'], ['우리는 여름에', '파도 소리'], ['Blue Hour', '서하'],
+    ['종이비행기', '이도윤'], ['Daisy', '코튼 캔디'], ['아무 일 없던 날', '유하'],
+    ['오래된 편지', '이도윤'], ['Midnight Drive', '네온 파크'], ['창문 너머', '파도 소리'],
+    ['Little Comet', '코튼 캔디'], ['비 오는 날의 산책', '서하'], ['Loop', '네온 파크'],
+    ['너에게 쓰는 마지막', '유하'], ['Sunday Market', '문라이트 클럽'], ['회색 도시', '이도윤'],
+    ['Honey Tea', '코튼 캔디'], ['바다가 들리는 방', '파도 소리'], ['Quiet Fire', '네온 파크'],
+    ['겨울잠', '서하'], ['Paper Moon', '코튼 캔디'], ['멀리 있는 사람', '유하'],
+    ['오후 세 시', '한여름'], ['Glass House', '한여름'], ['너의 이름을 부르면', '이도윤'],
+    ['Rooftop', '네온 파크'], ['새벽 두 시의 대화', '서하'], ['바람이 지나간 자리', '한여름'],
+    ['Mellow', '문라이트 클럽'], ['안녕, 오늘', '유하'], ['Tiny Room', '코튼 캔디'],
+    ['해질녘 산책', '파도 소리'], ['별을 세는 밤', '한여름'],
+    ['여름 우체국', '소금'], ['Late Coffee', '소금'], ['종이 달', '하루'], ['긴 오후', '하루']
+  ];
+
+  function buildSamplePlays() {
+    var rnd = mulberry32(20261117);
+    // 저녁·밤에 몰리고, 새벽에 한 번 더 솟는 패턴
+    var hourWeights = [2.6, 1.4, 0.6, 0.4, 0.6, 1.2, 2.6, 4.4, 5.6, 3.0, 2.4, 2.6,
+                       3.2, 2.8, 2.6, 3.4, 4.6, 6.2, 7.4, 8.6, 10.2, 11.4, 9.8, 5.2];
+    var hourTotal = hourWeights.reduce(function (a, b) { return a + b; }, 0);
+    var now = new Date();
+    var plays = [];
+    var total = 742;
+
+    function pickHour() {
+      var r = rnd() * hourTotal;
+      for (var h = 0; h < 24; h++) {
+        r -= hourWeights[h];
+        if (r <= 0) return h;
+      }
+      return 22;
+    }
+    function pickTrack() {
+      // 반복 청취가 두드러지되, 한 곡이 독점하지 않도록 완만한 편향
+      var idx = Math.floor(Math.pow(rnd(), 1.55) * SAMPLE_LIBRARY.length);
+      return SAMPLE_LIBRARY[Math.min(idx, SAMPLE_LIBRARY.length - 1)];
+    }
+
+    for (var i = 0; i < total; i++) {
+      var daysAgo = Math.floor(Math.pow(rnd(), 0.9) * 92);
+      var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysAgo);
+      d.setHours(pickHour(), Math.floor(rnd() * 60), Math.floor(rnd() * 60), 0);
+      if (d.getTime() > now.getTime()) d = new Date(now.getTime() - 3600 * 1000);
+      var tr = pickTrack();
+      plays.push({ title: tr[0], artist: tr[1], t: d });
+    }
+    plays.sort(function (a, b) { return a.t - b.t; });
+
+    // 모든 곡이 최소 한 번은 등장하도록 보정
+    SAMPLE_LIBRARY.forEach(function (tr, idx) {
+      if (!plays.some(function (p) { return p.title === tr[0]; })) {
+        var d2 = new Date(now.getTime() - (idx % 30 + 2) * 86400000 - idx * 3600000);
+        plays.push({ title: tr[0], artist: tr[1], t: d2 });
+      }
+    });
+    plays.sort(function (a, b) { return a.t - b.t; });
+    return plays;
+  }
+
+  function buildSampleEntries() {
+    var now = new Date();
+    function daysAgo(n, h) {
+      var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - n);
+      return ymd(d);
+    }
+    return [
+      { id: 'sample_1', date: daysAgo(1), song: '새벽의 온도', artist: '서하', moods: ['calm', 'soft'], intensity: 4, memo: '늦게까지 일하고 돌아오는 길에 계속 반복했다. 이상하게 마음이 편해졌음.', createdAt: new Date(now.getTime() - 86400000).toISOString(), sample: true },
+      { id: 'sample_2', date: daysAgo(3), song: 'Night Bus', artist: '문라이트 클럽', moods: ['blue'], intensity: 3, memo: '버스 창밖이 다 흐려 보이던 밤.', createdAt: new Date(now.getTime() - 3 * 86400000).toISOString(), sample: true },
+      { id: 'sample_3', date: daysAgo(4), song: '종이비행기', artist: '이도윤', moods: ['flutter', 'happy'], intensity: 5, memo: '오랜만에 연락 온 친구랑 통화하고 나서. 기분 좋게 들뜸.', createdAt: new Date(now.getTime() - 4 * 86400000).toISOString(), sample: true },
+      { id: 'sample_4', date: daysAgo(6), song: 'Loop', artist: '네온 파크', moods: ['focus'], intensity: 4, memo: '집중 안 될 때 무한 반복. 결국 새벽 3시까지 작업.', createdAt: new Date(now.getTime() - 6 * 86400000).toISOString(), sample: true },
+      { id: 'sample_5', date: daysAgo(8), song: '아무 일 없던 날', artist: '유하', moods: ['tired', 'calm'], intensity: 2, memo: '아무 일도 없어서 다행인 날.', createdAt: new Date(now.getTime() - 8 * 86400000).toISOString(), sample: true },
+      { id: 'sample_6', date: daysAgo(12), song: 'Quiet Fire', artist: '네온 파크', moods: ['angry'], intensity: 4, memo: '답답한 일이 있어서 볼륨 크게 하고 걸었다.', createdAt: new Date(now.getTime() - 12 * 86400000).toISOString(), sample: true }
+    ];
+  }
+
+  /* ============================================================
+     5. 렌더링 - 분석
+     ============================================================ */
+  function renderHero() {
+    var ds = state.dataset;
+    var bits = [];
+    if (ds) {
+      bits.push('<span class="pill"><span class="dot"></span>' + (ds.sample ? '샘플 데이터' : '내 시청 기록') + ' · ' + num(ds.plays) + '회 재생</span>');
+      if (ds.first && ds.last) {
+        bits.push('<span class="pill">' + esc(dotDate(new Date(ds.first))) + ' – ' + esc(dotDate(new Date(ds.last))) + '</span>');
+      }
+    }
+    if (state.entries.length) {
+      bits.push('<span class="pill">기록한 마음 ' + num(state.entries.length) + '개</span>');
+    }
+    $('#heroMeta').innerHTML = bits.join('');
+  }
+
+  function renderIntake() {
+    var box = $('#intake');
+    var ds = state.dataset;
+    if (!ds) {
+      box.className = 'card intake';
+      box.innerHTML =
+        '<div class="big-ico" aria-hidden="true">♫</div>' +
+        '<h2>시청 기록을 올려 주세요</h2>' +
+        '<p>구글 테이크아웃에서 받은 <b>watch-history.json</b>을 그대로 넣으면, YouTube Music 기록만 골라 분석해요.</p>' +
+        '<div class="btn-row">' +
+          '<button class="btn primary" type="button" id="pickFileBtn">내 watch-history.json 올리기</button>' +
+          '<button class="btn" type="button" id="sampleBtn">샘플로 둘러보기</button>' +
+        '</div>' +
+        '<p class="hint">기록이 없어도 괜찮아요 — 샘플로 먼저 둘러보고, 감정 기록은 지금부터 쌓아도 됩니다.</p>' +
+        '<details class="howto"><summary>기록 파일은 어떻게 받나요?</summary><ol>' +
+          '<li><a href="https://takeout.google.com" target="_blank" rel="noopener">takeout.google.com</a> → <b>모두 선택 해제</b> 후 <b>YouTube 및 YouTube Music</b>만 선택</li>' +
+          '<li><b>여러 형식</b> → <code>history</code> 항목을 <b>JSON</b>으로 변경 (기본값은 HTML이에요)</li>' +
+          '<li>내보내기 → 도착한 ZIP 압축 해제 → <code>Takeout/YouTube and YouTube Music/history/watch-history.json</code></li>' +
+          '<li>그 파일을 여기에 올리면 끝! (파일은 브라우저 안에서만 처리되고 어디에도 전송되지 않아요)</li>' +
+        '</ol><p class="hint" style="margin:8px 0 0;text-align:left">아이폰은 <b>파일</b> 앱에서 내려받은 ZIP을 탭하면 압축이 풀려요.</p></details>';
+      bindIntake();
+      return;
+    }
+
+    var range = (ds.first && ds.last)
+      ? dotDate(new Date(ds.first)) + ' – ' + dotDate(new Date(ds.last))
+      : '기간 정보 없음';
+    var ignoreLine = ds.ignored
+      ? '<div class="file-sub" style="opacity:.75">일반 YouTube 영상 ' + num(ds.ignored) + '개는 제외했어요</div>'
+      : '';
+    box.className = 'card intake loaded';
+    box.innerHTML =
+      '<div class="file-meta"><div class="file-name">' + (ds.sample ? '샘플 데이터' : esc(ds.fileName || 'watch-history.json')) + '</div>' +
+      '<div class="file-sub">' + num(ds.plays) + '회 재생 · ' + num(ds.uniqueTracks) + '곡 · ' + esc(range) + '</div>' +
+      ignoreLine + '</div>' +
+      '<div class="btn-row" style="justify-content:flex-end">' +
+        (ds.sample ? '<button class="btn small" type="button" id="clearSampleBtn">샘플 지우기</button>' : '') +
+        '<button class="btn small" type="button" id="pickFileBtn">다른 파일 올리기</button>' +
+      '</div>';
+    bindIntake();
+  }
+
+  function bindIntake() {
+    var pick = $('#pickFileBtn');
+    if (pick) pick.addEventListener('click', function () { $('#fileInput').click(); });
+    var sample = $('#sampleBtn');
+    if (sample) sample.addEventListener('click', loadSample);
+    var clear = $('#clearSampleBtn');
+    if (clear) clear.addEventListener('click', function () {
+      state.dataset = null;
+      try { localStorage.removeItem(KEY_DATASET); } catch (e) {}
+      renderAll();
+      toast('샘플 데이터를 지웠어요');
+    });
+  }
+
+  function renderStats() {
+    var ds = state.dataset;
+    var topArtist = ds.artists && ds.artists[0];
+    var topTrack = ds.tracks && ds.tracks[0];
+    var peakCount = ds.hours[ds.topHour];
+    var pct = ds.plays ? Math.round(peakCount / ds.plays * 100) : 0;
+    var stats = [
+      { k: '전체 재생', v: num(ds.plays) + '<small>회</small>', s: ds.days ? ds.days + '일 동안' : '' },
+      { k: '고유한 곡', v: num(ds.uniqueTracks) + '<small>곡</small>', s: topTrack ? '1위 ' + topTrack.title : '' },
+      { k: '최다 청취 시간', v: hourLabel(ds.topHour), s: num(peakCount) + '회 · ' + pct + '%' },
+      { k: '최다 아티스트', v: esc(topArtist ? topArtist.name : '-'), s: topArtist ? num(topArtist.count) + '회 · ' + topArtist.tracks + '곡' : '' }
+    ];
+    $('#stats').innerHTML = stats.map(function (s) {
+      return '<div class="stat"><div class="stat-k">' + s.k + '</div>' +
+        '<div class="stat-v">' + s.v + '</div>' +
+        '<div class="stat-s">' + esc(s.s) + '</div></div>';
+    }).join('');
+  }
+
+  function renderHourChart() {
+    var ds = state.dataset;
+    var max = Math.max.apply(null, ds.hours);
+    if (!max) max = 1;
+    var html = '';
+    for (var h = 0; h < 24; h++) {
+      var v = ds.hours[h];
+      var pct = v ? Math.max(3, Math.round(v / max * 100)) : 1.5;
+      html += '<div class="hbar' + (h === ds.topHour ? ' peak' : '') + '" tabindex="0" aria-label="' +
+        hourLabel(h) + ' ' + v + '회">' +
+        '<span class="hbar-val">' + v + '</span>' +
+        '<span class="hbar-fill" style="height:' + pct + '%"></span></div>';
+    }
+    $('#hoursChart').innerHTML = html;
+
+    var axis = '';
+    for (var a = 0; a < 24; a++) {
+      axis += '<span>' + (a % 3 === 0 ? a : '') + '</span>';
+    }
+    $('#hoursAxis').innerHTML = axis;
+
+    var peak = ds.hours[ds.topHour];
+    var share = ds.plays ? Math.round(peak / ds.plays * 100) : 0;
+    var night = 0, morning = 0, afternoon = 0, evening = 0;
+    for (var i = 0; i < 24; i++) {
+      if (i < 6) night += ds.hours[i];
+      else if (i < 12) morning += ds.hours[i];
+      else if (i < 18) afternoon += ds.hours[i];
+      else evening += ds.hours[i];
+    }
+    var parts = [['새벽', night], ['오전', morning], ['오후', afternoon], ['저녁·밤', evening]];
+    var best = parts[0];
+    parts.forEach(function (p) { if (p[1] > best[1]) best = p; });
+
+    $('#hoursNote').innerHTML =
+      '가장 많이 들은 시간은 <strong>' + hourLabel(ds.topHour) + '</strong> (' + num(peak) + '회, 전체의 ' + share + '%)' +
+      ' · <span style="color:var(--muted)">' + best[0] + ' 시간대에 ' + Math.round(best[1] / (ds.plays || 1) * 100) + '%를 들었어요</span>';
+  }
+
+  function renderTopTracks() {
+    var ds = state.dataset;
+    var top = (ds.tracks || []).slice(0, 15);
+    if (!top.length) {
+      $('#topTracks').innerHTML = '<div class="empty">곡 정보가 없어요.</div>';
+      $('#tracksFoot').textContent = '';
+      return;
+    }
+    var max = top[0].count;
+    $('#topTracks').innerHTML = top.map(function (t, i) {
+      var last = t.last ? dotDate(new Date(t.last)) : '';
+      return '<button class="trow" type="button" data-title="' + esc(t.title) + '" data-artist="' + esc(t.artist) + '">' +
+        '<span class="trank">' + (i + 1) + '</span>' +
+        '<span class="tmeta"><span class="ttitle">' + esc(t.title) + '</span>' +
+        '<span class="tartist">' + esc(t.artist || '아티스트 미상') + '</span></span>' +
+        '<span class="tright"><span class="tcount">' + num(t.count) + '회</span>' +
+        '<span class="tlast">' + (last ? '마지막 ' + last : '') + '</span></span>' +
+        '</button>';
+    }).join('');
+    $('#tracksFoot').textContent = '1위 ' + top[0].title + ' · ' + num(top[0].count) + '회 (2위의 ' +
+      (top[1] ? Math.round(top[0].count / top[1].count * 10) / 10 + '배' : '-') + ')';
+    $$('#topTracks .trow').forEach(function (row) {
+      row.addEventListener('click', function () {
+        prefillSong(row.getAttribute('data-title'), row.getAttribute('data-artist'));
+      });
+    });
+  }
+
+  function renderTopArtists() {
+    var ds = state.dataset;
+    var list = (ds.artists || []).slice(0, 10);
+    if (!list.length) {
+      $('#topArtists').innerHTML = '<div class="empty">아티스트 정보가 없어요.</div>';
+      return;
+    }
+    var max = list[0].count;
+    $('#topArtists').innerHTML = list.map(function (a, i) {
+      return '<div class="arow">' +
+        '<div class="arow-top"><span class="arow-name">' + (i + 1) + '. ' + esc(a.name) + '</span>' +
+        '<span class="arow-count">' + num(a.count) + '회 · ' + a.tracks + '곡</span></div>' +
+        '<div class="abar"><i style="width:' + Math.max(4, Math.round(a.count / max * 100)) + '%"></i></div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function renderDashboard() {
+    var has = !!state.dataset;
+    $('#dashboard').hidden = !has;
+    $('#emptyState').hidden = has;
+    if (!has) return;
+    renderStats();
+    renderHourChart();
+    renderTopTracks();
+    renderTopArtists();
+  }
+
+  /* ============================================================
+     6. 감정 기록
+     ============================================================ */
+  function normalizeEntry(e) {
+    var moods = Array.isArray(e.moods) ? e.moods.filter(function (m) { return !!MOOD_BY_ID[m]; }) : [];
+    return {
+      id: e.id || 'e_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      date: typeof e.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e.date) ? e.date : todayYMD(),
+      song: typeof e.song === 'string' ? e.song.trim().slice(0, 80) : '',
+      artist: typeof e.artist === 'string' ? e.artist.trim().slice(0, 60) : '',
+      moods: moods.length ? moods : ['calm'],
+      intensity: Math.min(5, Math.max(1, Number(e.intensity) || 3)),
+      memo: typeof e.memo === 'string' ? e.memo.trim().slice(0, 90) : '',
+      createdAt: e.createdAt && !isNaN(new Date(e.createdAt).getTime()) ? new Date(e.createdAt).toISOString() : new Date().toISOString(),
+      sample: !!e.sample
+    };
+  }
+
+  function moodChipHTML(id, opts) {
+    var m = MOOD_BY_ID[id];
+    if (!m) return '';
+    var pressed = opts && opts.selected ? ' aria-pressed="true"' : ' aria-pressed="false"';
+    var count = opts && typeof opts.count === 'number' ? '<span class="cnt">' + opts.count + '</span>' : '';
+    return '<button type="button" class="chip" data-mood="' + m.id + '"' + pressed + '>' +
+      '<span class="em" aria-hidden="true">' + m.emoji + '</span>' + m.label + count + '</button>';
+  }
+
+  function renderForm() {
+    var box = $('#moodChips');
+    box.innerHTML = MOODS.map(function (m) {
+      return moodChipHTML(m.id, { selected: state.selectedMoods.indexOf(m.id) !== -1 });
+    }).join('');
+    $$('#moodChips .chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var id = chip.getAttribute('data-mood');
+        var at = state.selectedMoods.indexOf(id);
+        if (at === -1) state.selectedMoods.push(id);
+        else state.selectedMoods.splice(at, 1);
+        chip.setAttribute('aria-pressed', at === -1 ? 'true' : 'false');
+        $('#moodHint').textContent = state.selectedMoods.length
+          ? '고른 마음: ' + state.selectedMoods.map(function (x) { return MOOD_BY_ID[x].label; }).join(', ')
+          : '한 가지 이상 골라 주세요.';
+      });
+    });
+    updateIntensity();
+  }
+
+  function updateIntensity() {
+    var v = Number($('#fIntensity').value);
+    $('#rangeLabel').textContent = INTENSITY_LABEL[v] || '보통';
+    var dots = '';
+    for (var i = 1; i <= 5; i++) dots += '<i class="' + (i <= v ? 'on' : '') + '"></i>';
+    $('#rangeDots').innerHTML = dots;
+  }
+
+  function renderQuickSongs() {
+    var box = $('#quickSongs');
+    var ds = state.dataset;
+    if (!ds || !ds.tracks || !ds.tracks.length) {
+      box.innerHTML = '';
+      $('#songHint').textContent = '';
+      return;
+    }
+    var picks = ds.tracks.slice(0, 4);
+    box.innerHTML = picks.map(function (t) {
+      return '<button type="button" class="chip" data-quick-title="' + esc(t.title) + '" data-quick-artist="' + esc(t.artist) + '">' +
+        '<span class="em" aria-hidden="true">♪</span>' + esc(t.title) + '</button>';
+    }).join('');
+    $$('#quickSongs .chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        prefillSong(chip.getAttribute('data-quick-title'), chip.getAttribute('data-quick-artist'), true);
+      });
+    });
+    $('#songHint').textContent = '자주 들은 곡을 눌러 바로 채울 수 있어요.';
+  }
+
+  function renderSongDatalist() {
+    var ds = state.dataset;
+    var list = $('#songList');
+    if (!ds || !ds.tracks) { list.innerHTML = ''; return; }
+    list.innerHTML = ds.tracks.slice(0, 300).map(function (t) {
+      return '<option value="' + esc(t.title) + '" label="' + esc(t.artist || '아티스트 미상') + '"></option>';
+    }).join('');
+  }
+
+  function prefillSong(title, artist, keepTab) {
+    $('#fSong').value = title || '';
+    if (artist) $('#fArtist').value = artist;
+    if (!keepTab) switchTab('record');
+    setTimeout(function () { $('#fSong').focus({ preventScroll: true }); }, 60);
+    toast('‘' + (title || '') + '’ 로 감정을 남겨 보세요');
+  }
+
+  function findArtistByTitle(title) {
+    var ds = state.dataset;
+    if (!ds || !ds.tracks) return '';
+    var t = String(title || '').trim().toLowerCase();
+    for (var i = 0; i < ds.tracks.length; i++) {
+      if (ds.tracks[i].title.toLowerCase() === t) return ds.tracks[i].artist;
+    }
+    return '';
+  }
+
+  function sortedEntries() {
+    return state.entries.slice().sort(function (a, b) {
+      if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+  }
+
+  function filteredEntries() {
+    var all = sortedEntries();
+    if (!state.filterMood) return all;
+    return all.filter(function (e) { return e.moods.indexOf(state.filterMood) !== -1; });
+  }
+
+  function entryHTML(e) {
+    var moodHTML = e.moods.map(function (id) {
+      var m = MOOD_BY_ID[id];
+      return '<span class="pill" style="border-color:' + m.color + '55;color:' + m.color + '">' +
+        '<span aria-hidden="true">' + m.emoji + '</span>' + m.label + '</span>';
+    }).join('');
+    var dots = '';
+    for (var i = 1; i <= 5; i++) dots += '<i class="' + (i <= e.intensity ? 'on' : '') + '"></i>';
+
+    var songLine = e.song
+      ? '<div style="display:flex;align-items:baseline;gap:6px;min-width:0;flex-wrap:wrap">' +
+          '<span class="entry-song">' + esc(e.song) + '</span>' +
+          (e.artist ? '<span class="entry-artist">' + esc(e.artist) + '</span>' : '') +
+        '</div>'
+      : '<div class="entry-artist">곡 없이 남긴 기록</div>';
+
+    return '<div class="entry" data-id="' + esc(e.id) + '">' +
+      '<div class="entry-top">' + moodHTML +
+        '<span class="badge-intensity" title="강도 ' + e.intensity + '/5" aria-label="강도 ' + e.intensity + '">' + dots + '</span>' +
+        '<span class="entry-actions">' +
+          '<button class="mini" type="button" data-act="edit" data-id="' + esc(e.id) + '">수정</button>' +
+          '<button class="mini" type="button" data-act="del" data-id="' + esc(e.id) + '">삭제</button>' +
+        '</span></div>' +
+      songLine +
+      (e.memo ? '<p class="entry-memo">' + esc(e.memo) + '</p>' : '') +
+      '</div>';
+  }
+
+  function renderTimeline() {
+    var box = $('#timeline');
+    var all = filteredEntries();
+    var total = state.entries.length;
+    $('#entryCount').textContent = total
+      ? (state.filterMood ? all.length + ' / ' + num(total) + '개' : '모두 ' + num(total) + '개')
+      : '';
+
+    var bar = $('#filterBar');
+    if (bar) {
+      if (state.filterMood && MOOD_BY_ID[state.filterMood]) {
+        bar.hidden = false;
+        $('#filterLabel').textContent = MOOD_BY_ID[state.filterMood].emoji + ' ' + MOOD_BY_ID[state.filterMood].label + ' 기록만 보는 중';
+      } else {
+        bar.hidden = true;
+      }
+    }
+
+    if (!all.length) {
+      box.innerHTML = state.filterMood
+        ? '<div class="empty"><span class="em">✎</span>이 감정으로 남긴 기록이 없어요.</div>'
+        : '<div class="empty"><span class="em">✎</span>아직 남긴 마음이 없어요.<br>오늘 들은 노래 옆에 마음을 적어 보세요.</div>';
+      $('#moreBtn').hidden = true;
+      return;
+    }
+
+    var shown = all.slice(0, state.visibleEntries);
+    var html = '';
+    var lastDate = null;
+    var today = todayYMD();
+
+    shown.forEach(function (e) {
+      if (e.date !== lastDate) {
+        var label = e.date === today ? '<span class="today">오늘</span> · ' + koreanDate(e.date) : koreanDate(e.date);
+        html += '<div class="dayhead"><span>' + label + '</span><span class="line"></span></div>';
+        lastDate = e.date;
+      }
+      html += entryHTML(e);
+    });
+    box.innerHTML = html;
+
+    $('#moreBtn').hidden = all.length <= state.visibleEntries;
+    $('#moreBtn').textContent = '더 보기 (' + (all.length - shown.length) + '개)';
+
+    $$('#timeline [data-act]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-id');
+        if (btn.getAttribute('data-act') === 'del') deleteEntry(id);
+        else startEdit(id);
+      });
+    });
+  }
+
+  function startEdit(id) {
+    var e = state.entries.filter(function (x) { return x.id === id; })[0];
+    if (!e) return;
+    state.editingId = id;
+    state.selectedMoods = e.moods.slice();
+    $('#fDate').value = e.date;
+    $('#fSong').value = e.song;
+    $('#fArtist').value = e.artist;
+    $('#fMemo').value = e.memo;
+    $('#fIntensity').value = String(e.intensity);
+    $('#formTitle').textContent = '기록 수정';
+    $('#saveBtn').textContent = '수정 저장';
+    $('#cancelEditBtn').hidden = false;
+    renderForm();
+    $('#moodHint').textContent = state.selectedMoods.length
+      ? '고른 마음: ' + state.selectedMoods.map(function (x) { return MOOD_BY_ID[x].label; }).join(', ')
+      : '한 가지 이상 골라 주세요.';
+    switchTab('record');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetForm() {
+    state.editingId = null;
+    state.selectedMoods = [];
+    $('#moodForm').reset();
+    $('#fDate').value = todayYMD();
+    $('#fIntensity').value = '3';
+    $('#formTitle').textContent = '오늘의 마음 남기기';
+    $('#saveBtn').textContent = '기록 저장';
+    $('#cancelEditBtn').hidden = true;
+    $('#moodHint').textContent = '한 가지 이상 골라 주세요.';
+    renderForm();
+  }
+
+  function deleteEntry(id) {
+    var e = state.entries.filter(function (x) { return x.id === id; })[0];
+    if (!e) return;
+    var ok = window.confirm('이 기록을 지울까요?\n' + koreanDate(e.date) + ' · ' + (e.song || '곡 없음'));
+    if (!ok) return;
+    state.entries = state.entries.filter(function (x) { return x.id !== id; });
+    persistEntries();
+    renderAll();
+    toast('기록을 지웠어요');
+  }
+
+  function persistEntries() {
+    var ok = saveJSON(KEY_ENTRIES, state.entries);
+    if (!ok) toast('저장 공간이 부족해 기록을 저장하지 못했어요. 내보내기로 백업해 주세요.');
+    renderStorageNote();
+  }
+
+  function submitForm(ev) {
+    ev.preventDefault();
+    if (!state.selectedMoods.length) {
+      $('#moodHint').textContent = '마음을 한 가지 이상 골라 주세요.';
+      $('#moodChips').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    var date = $('#fDate').value || todayYMD();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      toast('날짜를 확인해 주세요');
+      return;
+    }
+    var song = $('#fSong').value.trim();
+    var artist = $('#fArtist').value.trim();
+    if (song && !artist) artist = findArtistByTitle(song);
+
+    var data = {
+      date: date,
+      song: song,
+      artist: artist,
+      moods: state.selectedMoods.slice(),
+      intensity: Number($('#fIntensity').value),
+      memo: $('#fMemo').value.trim()
+    };
+
+    if (state.editingId) {
+      state.entries = state.entries.map(function (e) {
+        if (e.id !== state.editingId) return e;
+        return normalizeEntry(Object.assign({}, e, data));
+      });
+      persistEntries();
+      toast('수정했어요');
+    } else {
+      var entry = normalizeEntry(Object.assign({ id: 'e_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6) }, data));
+      state.entries = state.entries.concat([entry]);
+      persistEntries();
+      toast('마음을 기록했어요');
+    }
+    resetForm();
+    renderAll();
+    var tl = $('#timeline');
+    if (tl) tl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ============================================================
+     7. 모아보기
+     ============================================================ */
+  function entriesByMood() {
+    var map = {};
+    MOODS.forEach(function (m) { map[m.id] = []; });
+    state.entries.forEach(function (e) {
+      e.moods.forEach(function (id) {
+        if (map[id]) map[id].push(e);
+      });
+    });
+    return map;
+  }
+
+  function renderCollection() {
+    var map = entriesByMood();
+    var total = state.entries.length;
+
+    if (!total) {
+      $('#moodGrid').innerHTML = MOODS.map(function (m) {
+        return '<button type="button" class="moodtile" data-mood="' + m.id + '" aria-pressed="false">' +
+          '<span class="em" aria-hidden="true">' + m.emoji + '</span>' +
+          '<span class="nm">' + m.label + '</span><span class="ct">0</span></button>';
+      }).join('');
+      $('#moodDetail').innerHTML =
+        '<div class="empty"><span class="em">❏</span>아직 모아 볼 기록이 없어요.<br>' +
+        '감정을 남기면, 그 마음이었을 때 들은 노래가 여기에 쌓입니다.</div>';
+      $$('#moodGrid .moodtile').forEach(function (b) {
+        b.addEventListener('click', function () { switchTab('record'); });
+      });
+      return;
+    }
+
+    if (!state.activeMood || !map[state.activeMood] || !map[state.activeMood].length) {
+      var best = null;
+      MOODS.forEach(function (m) {
+        if (!best || map[m.id].length > map[best].length) best = m.id;
+      });
+      if (!state.activeMood || (map[state.activeMood] && !map[state.activeMood].length)) {
+        state.activeMood = map[best].length ? best : null;
+      }
+    }
+
+    $('#moodGrid').innerHTML = MOODS.map(function (m) {
+      return '<button type="button" class="moodtile" data-mood="' + m.id + '" aria-pressed="' +
+        (state.activeMood === m.id ? 'true' : 'false') + '">' +
+        '<span class="em" aria-hidden="true">' + m.emoji + '</span>' +
+        '<span class="nm">' + m.label + '</span><span class="ct">' + map[m.id].length + '</span></button>';
+    }).join('');
+
+    $$('#moodGrid .moodtile').forEach(function (b) {
+      b.addEventListener('click', function () {
+        state.activeMood = b.getAttribute('data-mood');
+        renderCollection();
+      });
+    });
+
+    var id = state.activeMood;
+    if (!id) {
+      $('#moodDetail').innerHTML = '<div class="empty">감정을 골라 주세요.</div>';
+      return;
+    }
+    var m = MOOD_BY_ID[id];
+    var list = map[id];
+    if (!list.length) {
+      $('#moodDetail').innerHTML = '<div class="mood-detail-head"><span class="em" aria-hidden="true">' + m.emoji + '</span>' +
+        '<h3>' + m.label + '</h3><span class="sub">아직 기록이 없어요</span></div>' +
+        '<div class="empty">이 마음으로 남긴 기록이 아직 없어요.</div>';
+      return;
+    }
+
+    // 곡 집계
+    var songMap = {};
+    var intensitySum = 0;
+    list.forEach(function (e) {
+      intensitySum += e.intensity;
+      if (!e.song) return;
+      var k = e.song.toLowerCase() + '\u0000' + (e.artist || '').toLowerCase();
+      if (!songMap[k]) songMap[k] = { title: e.song, artist: e.artist || '', count: 0 };
+      songMap[k].count += 1;
+    });
+    var songs = Object.keys(songMap).map(function (k) { return songMap[k]; })
+      .sort(function (a, b) { return b.count - a.count; }).slice(0, 6);
+    var maxCount = songs.length ? songs[0].count : 1;
+    var avg = Math.round(intensitySum / list.length * 10) / 10;
+
+    var songHTML = songs.length
+      ? songs.map(function (s) {
+          return '<div class="songbar"><span class="nm"><b>' + esc(s.title) + '</b>' +
+            (s.artist ? ' <span>' + esc(s.artist) + '</span>' : '') +
+            '<span style="display:block;height:5px;border-radius:99px;background:var(--track);margin-top:4px;overflow:hidden">' +
+            '<i style="display:block;height:100%;width:' + Math.max(8, Math.round(s.count / maxCount * 100)) + '%;background:' + m.color + ';opacity:.85;border-radius:99px"></i></span></span>' +
+            '<span class="ct">' + s.count + '회</span></div>';
+        }).join('')
+      : '<div class="empty" style="padding:16px">곡을 적어 둔 기록이 아직 없어요.</div>';
+
+    var memos = list.filter(function (e) { return e.memo; })
+      .sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); })
+      .slice(0, 8)
+      .map(function (e) {
+        return '<div class="memo-item"><time>' + shortDate(e.date) + '</time><span>' + esc(e.memo) + '</span></div>';
+      }).join('');
+
+    $('#moodDetail').innerHTML =
+      '<div class="mood-detail-head"><span class="em" aria-hidden="true">' + m.emoji + '</span>' +
+      '<div><h3>' + m.label + '</h3><span class="sub">기록 ' + list.length + '개 · 평균 강도 ' + avg + '/5</span></div></div>' +
+      '<div class="section-label" style="margin:0 0 8px">이 감정을 느꼈을 때 주로 들은 노래</div>' +
+      '<div class="songbars">' + songHTML + '</div>' +
+      (memos ? '<div class="section-label" style="margin:18px 0 8px">남긴 메모</div><div class="memos">' + memos + '</div>' : '') +
+      '<div style="margin-top:18px"><button class="btn small" type="button" data-mood-timeline="' + m.id + '">타임라인에서 이 감정만 보기</button></div>';
+
+    var jump = $('#moodDetail [data-mood-timeline]');
+    if (jump) jump.addEventListener('click', function () {
+      state.filterMood = id;
+      state.visibleEntries = 20;
+      switchTab('record');
+      renderTimeline();
+    });
+  }
+
+  /* ============================================================
+     8. 저장 / 내보내기 / 가져오기
+     ============================================================ */
+  function renderStorageNote() {
+    var note = !state.dataset
+      ? '시청 기록 없음'
+      : '시청 기록 요약';
+    var text = state.storageOK
+      ? '이 브라우저에 <b>' + num(state.entries.length) + '개</b>의 마음과 ' + note + '이 저장돼 있어요.'
+      : '<b>이 브라우저에서는 자동 저장이 막혀 있어요.</b> 기록은 지금 화면에만 남으니, 작업 후 꼭 내보내기로 파일을 보관해 주세요.';
+    var a = $('#storageNote');
+    var b = $('#storageNote2');
+    if (a) a.innerHTML = text;
+    if (b) b.innerHTML = text;
+  }
+
+  function exportData() {
+    var payload = {
+      app: 'music-mood-journal',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      entries: state.entries,
+      dataset: state.dataset && !state.dataset.sample ? state.dataset : null
+    };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'music-mood-journal-' + todayYMD() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+    toast(state.entries.length ? '기록을 내보냈어요' : '빈 기록을 내보냈어요');
+  }
+
+  function importData(file) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var data = JSON.parse(String(reader.result));
+        var entries = null;
+        var dataset = null;
+
+        if (Array.isArray(data)) entries = data;
+        else if (data && Array.isArray(data.entries)) {
+          entries = data.entries;
+          dataset = data.dataset || null;
+        } else throw new Error('FORMAT');
+
+        var cleaned = entries.map(normalizeEntry).filter(function (e) { return !!e.id; });
+        var existing = {};
+        state.entries.forEach(function (e) { existing[e.id] = true; });
+        var added = 0;
+        cleaned.forEach(function (e) {
+          if (!existing[e.id]) { state.entries.push(e); existing[e.id] = true; added++; }
+        });
+
+        if (dataset && dataset.tracks && dataset.hours) {
+          if (!state.dataset || window.confirm('가져온 파일의 시청 기록 분석으로 바꿀까요?\n지금 보고 있는 분석은 사라져요.')) {
+            state.dataset = dataset;
+            state.dataset.sample = false;
+            saveJSON(KEY_DATASET, state.dataset);
+          }
+        }
+
+        persistEntries();
+        renderAll();
+        toast(added ? added + '개의 기록을 가져왔어요' : '새로 가져올 기록이 없었어요');
+      } catch (err) {
+        toast('가져올 수 없는 파일이에요 (내보내기한 JSON인지 확인해 주세요)');
+      }
+    };
+    reader.onerror = function () { toast('파일을 읽지 못했어요'); };
+    reader.readAsText(file);
+  }
+
+  function loadSample() {
+    var plays = buildSamplePlays();
+    state.dataset = aggregate(plays, 'sample', true);
+    saveJSON(KEY_DATASET, state.dataset);
+
+    // 샘플 감정 기록은 아직 아무 기록도 없을 때만 채워 넣기
+    if (!state.entries.length) {
+      state.entries = buildSampleEntries().map(normalizeEntry);
+      persistEntries();
+    }
+    state.activeMood = null;
+    renderAll();
+    toast('샘플 데이터를 불러왔어요');
+  }
+
+  function handleFile(file) {
+    if (!file) return;
+    if (!/\.json$/i.test(file.name) && file.type && file.type.indexOf('json') === -1) {
+      toast('JSON 파일을 올려 주세요 (.json)');
+      return;
+    }
+    var pick = $('#pickFileBtn');
+    var original = pick ? pick.textContent : '';
+    if (pick) { pick.textContent = '분석하는 중…'; pick.disabled = true; }
+
+    var reader = new FileReader();
+    reader.onload = function () {
+      setTimeout(function () {
+        try {
+          var parsed = JSON.parse(String(reader.result));
+          var result = parseWatchHistory(parsed);
+          if (!result.plays.length) {
+            toast('YouTube Music 기록을 찾지 못했어요. 파일에 음악 기록이 있는지 확인해 주세요.');
+          } else {
+            state.dataset = aggregate(result.plays, 'takeout', false);
+            state.dataset.ignored = result.ignored;
+            state.dataset.fileName = file.name;
+            if (!saveJSON(KEY_DATASET, state.dataset)) {
+              toast('파일은 분석했지만 저장 공간이 부족해 다음에 다시 열면 사라져요.');
+            }
+            state.activeMood = null;
+            renderAll();
+            var msg = num(result.plays.length) + '곡의 기록을 분석했어요';
+            var extra = [];
+            if (result.ignored) extra.push('YouTube 영상 ' + num(result.ignored) + '개');
+            if (result.removed) extra.push('이미 지워진 곡 ' + num(result.removed) + '개');
+            if (extra.length) msg += ' (' + extra.join(' · ') + ' 제외)';
+            toast(msg);
+          }
+        } catch (err) {
+          toast(err && err.message === 'NOT_WATCH_HISTORY'
+            ? 'watch-history.json 형식이 아니에요'
+            : '파일을 읽는 중 문제가 생겼어요 (JSON 형식인지 확인해 주세요)');
+        } finally {
+          if (pick) { pick.textContent = original || '내 기록 올리기'; pick.disabled = false; }
+          $('#fileInput').value = '';
+        }
+      }, 30);
+    };
+    reader.onerror = function () {
+      toast('파일을 읽지 못했어요');
+      if (pick) { pick.textContent = original || '내 기록 올리기'; pick.disabled = false; }
+    };
+    reader.readAsText(file);
+  }
+
+  /* ============================================================
+     9. 탭 / 이벤트 / 초기화
+     ============================================================ */
+  function switchTab(name) {
+    state.activeTab = name;
+    ['analyze', 'record', 'collection'].forEach(function (t) {
+      var tab = $('#tab-' + t);
+      var view = $('#view-' + t);
+      var on = t === name;
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      view.hidden = !on;
+    });
+    if (name === 'collection') renderCollection();
+    if (name === 'record') { renderQuickSongs(); renderTimeline(); }
+    var tabsEl = $('.tabs');
+    if (tabsEl) {
+      var target = Math.max(0, tabsEl.offsetTop - 70);
+      if (Math.abs(window.scrollY - target) > 40) window.scrollTo({ top: target, behavior: 'smooth' });
+    }
+  }
+
+  function renderAll() {
+    renderHero();
+    renderIntake();
+    renderDashboard();
+    renderTimeline();
+    renderCollection();
+    renderStorageNote();
+    renderSongDatalist();
+    renderQuickSongs();
+  }
+
+  function init() {
+    initTheme();
+
+    // 저장소 사용 가능 여부 확인 (사생활 보호 모드 등)
+    try {
+      localStorage.setItem('mmj.probe', '1');
+      localStorage.removeItem('mmj.probe');
+    } catch (e) { state.storageOK = false; }
+
+    // 저장된 상태 복원
+    try {
+      var rawEntries = localStorage.getItem(KEY_ENTRIES);
+      if (rawEntries) {
+        var arr = JSON.parse(rawEntries);
+        if (Array.isArray(arr)) state.entries = arr.map(normalizeEntry);
+      }
+    } catch (e) { /* 손상된 저장값은 무시 */ }
+    var ds = loadJSON(KEY_DATASET, null);
+    if (ds && Array.isArray(ds.tracks) && Array.isArray(ds.hours) && typeof ds.plays === 'number') {
+      state.dataset = ds;
+    }
+
+    // 날짜 기본값
+    $('#fDate').value = todayYMD();
+
+    // 테마 토글
+    $('#themeToggle').addEventListener('click', function () {
+      var cur = document.documentElement.getAttribute('data-theme');
+      var next = cur === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      try { localStorage.setItem(KEY_THEME, next); } catch (e) {}
+    });
+
+    // 스크롤 시 상단 바 경계선
+    window.addEventListener('scroll', function () {
+      var bar = $('#topbar');
+      if (window.scrollY > 4) bar.classList.add('is-stuck');
+      else bar.classList.remove('is-stuck');
+    }, { passive: true });
+
+    // 탭
+    $$('.tab').forEach(function (t) {
+      t.addEventListener('click', function () { switchTab(t.getAttribute('data-tab')); });
+    });
+
+    // 파일 업로드
+    $('#fileInput').addEventListener('change', function (e) {
+      var f = e.target.files && e.target.files[0];
+      handleFile(f);
+    });
+    $('#goRecordBtn').addEventListener('click', function () { switchTab('record'); });
+    var importEmpty = $('#importBtnEmpty');
+    if (importEmpty) importEmpty.addEventListener('click', function () { $('#importInput').click(); });
+    var clearFilter = $('#clearFilterBtn');
+    if (clearFilter) clearFilter.addEventListener('click', function () {
+      state.filterMood = null;
+      state.visibleEntries = 20;
+      renderTimeline();
+    });
+
+    // 드래그 앤 드롭
+    ['dragover', 'dragenter'].forEach(function (evt) {
+      document.addEventListener(evt, function (e) {
+        if (!e.dataTransfer || Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') === -1) return;
+        e.preventDefault();
+        var box = $('#intake');
+        if (box) box.style.borderColor = 'var(--accent)';
+      });
+    });
+    ['dragleave', 'drop'].forEach(function (evt) {
+      document.addEventListener(evt, function (e) {
+        var box = $('#intake');
+        if (box) box.style.borderColor = '';
+      });
+    });
+    document.addEventListener('drop', function (e) {
+      if (!e.dataTransfer || !e.dataTransfer.files || !e.dataTransfer.files.length) return;
+      e.preventDefault();
+      handleFile(e.dataTransfer.files[0]);
+    });
+
+    // 감정 폼
+    $('#fIntensity').addEventListener('input', updateIntensity);
+    $('#moodForm').addEventListener('submit', submitForm);
+    $('#cancelEditBtn').addEventListener('click', function () {
+      resetForm();
+      toast('수정을 취소했어요');
+    });
+    $('#fSong').addEventListener('input', function () {
+      if (!$('#fArtist').value.trim()) {
+        var a = findArtistByTitle(this.value);
+        if (a) $('#fArtist').value = a;
+      }
+    });
+    $('#moreBtn').addEventListener('click', function () {
+      state.visibleEntries += 20;
+      renderTimeline();
+    });
+
+    // 내보내기 / 가져오기
+    ['#exportBtn', '#exportBtn2'].forEach(function (sel) {
+      var el = $(sel);
+      if (el) el.addEventListener('click', exportData);
+    });
+    ['#importBtn', '#importBtn2'].forEach(function (sel) {
+      var el = $(sel);
+      if (el) el.addEventListener('click', function () { $('#importInput').click(); });
+    });
+    $('#importInput').addEventListener('change', function (e) {
+      var f = e.target.files && e.target.files[0];
+      if (f) importData(f);
+      e.target.value = '';
+    });
+    var reset = $('#resetBtn');
+    if (reset) reset.addEventListener('click', function () {
+      if (!state.entries.length) { toast('지울 감정 기록이 없어요'); return; }
+      if (!window.confirm('감정 기록 ' + state.entries.length + '개를 모두 지울까요?\n(시청 기록 분석은 그대로 남아요. 되돌릴 수 없어요.)')) return;
+      state.entries = [];
+      persistEntries();
+      renderAll();
+      toast('모든 감정 기록을 지웠어요');
+    });
+
+    renderForm();
+    renderAll();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+</body>
+</html>
