@@ -479,13 +479,14 @@
   .quadcard{
     border:1px solid var(--line);border-radius:14px;padding:11px 12px;
     background:var(--surface-2);text-align:left;transition:all .15s ease;
+    display:grid;gap:3px;
   }
   .quadcard:hover{border-color:var(--line-strong);transform:translateY(-1px)}
   .quadcard[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
   .quadcard .qh{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:10.5px;color:var(--muted);font-weight:800;letter-spacing:.06em}
-  .quadcard .qn{font-size:13px;font-weight:700;margin-top:2px;letter-spacing:-.01em}
-  .quadcard .qd{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:2px}
-  .quadcard .qm{font-size:11.5px;color:var(--ink-soft);margin-top:5px}
+  .quadcard .qn{display:block;font-size:13px;font-weight:700;margin-top:1px;letter-spacing:-.01em}
+  .quadcard .qd{display:block;font-size:11.5px;color:var(--muted);line-height:1.5}
+  .quadcard .qm{display:block;font-size:11.5px;color:var(--ink-soft);margin-top:2px}
   .axisnote{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px;font-size:11.5px;color:var(--muted)}
   .axisnote b{color:var(--ink-soft);font-weight:650}
 
@@ -1771,9 +1772,9 @@
       var list = MOODS.filter(function (m) { return m.quad === q.id; });
       return '<button type="button" class="quadcard" data-quad="' + q.id + '" aria-pressed="' +
         (state.quadFocus === q.id ? 'true' : 'false') + '">' +
-        '<span class="qh"><span>' + q.id + '</span><span>' + esc(q.hint) + '</span></span>' +
-        '<span class="qn">' + q.name + ' · ' + q.pair + '</span>' +
-        '<span class="qd">' + esc(q.desc) + '</span>' +
+        '<span class="qh"><span>' + q.id + '</span><span>' + q.pair + '</span></span>' +
+        '<span class="qn">' + q.name + '</span>' +
+        '<span class="qd">' + esc(q.desc) + ' · ' + esc(q.hint) + '</span>' +
         '<span class="qm">' + list.map(function (m) { return m.emoji + ' ' + m.label; }).join(' · ') + '</span>' +
         '</button>';
     }).join('');
