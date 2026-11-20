@@ -2833,6 +2833,7 @@
       var added = [];
       var failed = [];
       var selfBackup = false;
+      var ownChanged = false;
       results.forEach(function (res) {
         if (res.failed) { failed.push(res.name); return; }
         try {
@@ -2840,11 +2841,26 @@
           if (data && data.app === 'music-mood-journal' && data.profile && !data.participant) { selfBackup = true; return; }
           var peer = peerFromPayload(data, res.name);
           if (!peer || !peer.entries.length) { failed.push(res.name); return; }
+          if (peer.code === state.profile.code) {
+            /* 내가 내보낸 라벨 파일을 다시 불러온 경우 → 내 기록에 합친다 */
+            var ids = {}, keys = {};
+            state.entries.forEach(function (e) { ids[e.id] = 1; keys[entryDedupeKey(e)] = 1; });
+            var n0 = 0;
+            peer.entries.forEach(function (e) {
+              var k = entryDedupeKey(e);
+              if (ids[e.id] || keys[k]) return;
+              state.entries.push(e); ids[e.id] = 1; keys[k] = 1; n0++;
+            });
+            if (n0) ownChanged = true;
+            added.push(n0);
+            return;
+          }
           var merged = mergePeer(peer);
           added.push(merged.added);
         } catch (e) { failed.push(res.name); }
       });
       saveJSON(KEY_PEERS, state.peers);
+      if (ownChanged) persistEntries();
       renderData();
       renderRecommendResults();
       var totalAdded = added.reduce(function (a, b) { return a + b; }, 0);
