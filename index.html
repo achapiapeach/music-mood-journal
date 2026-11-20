@@ -1061,7 +1061,7 @@
 
   var GOALS = [
     { id: 'keep', label: '이 기분 이어가기', sub: '지금 그대로', desc: '지금 기분과 비슷한 곡' },
-    { id: 'lift', label: '기분 끌어올리기', sub: '긍정·활기 쪽으로', desc: '지금보다 밝고 힘 있는 곡' },
+    { id: 'lift', label: '기분 끌어올리기', sub: '더 밝고 힘 있게', desc: '지금보다 밝고 힘 있는 곡' },
     { id: 'calm', label: '마음 진정시키기', sub: '에너지 낮추기', desc: '지금보다 차분한 곡' }
   ];
   var GOAL_BY_ID = {};
@@ -2473,8 +2473,8 @@
 
   /* 목표 좌표: 이어가기 / 끌어올리기(긍정·활기) / 진정시키기(에너지 낮추기) */
   function goalTarget(v, a, goal) {
-    if (goal === 'lift') return { v: clamp(v + 0.55, -1, 1), a: clamp(a + 0.18, -1, 1) };
-    if (goal === 'calm') return { v: clamp(v + 0.22, -1, 1), a: clamp(a - 0.55, -1, 1) };
+    if (goal === 'lift') return { v: clamp(v + 0.55, -1, 1), a: clamp(a + 0.40, -1, 1) };
+    if (goal === 'calm') return { v: clamp(v + 0.25, -1, 1), a: clamp(a - 0.55, -1, 1) };
     return { v: v, a: a };
   }
 
