@@ -809,7 +809,7 @@
 
         <div class="field">
           <label>④ 세부 감정 <span style="font-weight:500;color:var(--muted)">(선택 · 여러 개)</span></label>
-          <p class="card-desc" style="margin:-2px 0 8px">기본 감정만으로 아쉬울 때 — 신남·화남·슬픔·수면 계열로 한 번 더 쪼개 두면 나중에 들으면서 정리하기 쉬워요.</p>
+          <p class="card-desc" style="margin:-2px 0 8px">기본 감정 위에 한 번 더 쪼개 볼 수 있어요.</p>
           <div id="subChips"></div>
           <div class="hintline" id="subHint">세부 감정을 고르면 위 기본 감정도 함께 선택돼요.</div>
         </div>
@@ -2375,8 +2375,7 @@
     return '<div id="pastePanel" hidden style="margin-top:14px">' +
       '<div class="notebox">공식 파일이 없는 플랫폼은 목록을 그대로 복사해 넣으면 돼요. ' +
         '한 줄에 한 곡씩 — <code>곡명 - 아티스트</code> 또는 <code>아티스트 - 곡명</code>. ' +
-        '앞에 <code>2024-05-01</code> 같은 날짜를, 뒤에 <code>(12회)</code> 같은 횟수를 붙여도 읽습니다. ' +
-        '줄 번호·글머리표(<code>1.</code>, <code>-</code>)는 알아서 뗍니다.</div>' +
+        '앞에 <code>2024-05-01</code> 날짜를, 뒤에 <code>(12회)</code> 횟수를 붙여도 읽습니다. 날짜가 없으면 오늘로 들어가요.</div>' +
       '<div class="field pastebox" style="margin-top:12px">' +
         '<label for="pasteArea">목록</label>' +
         '<textarea id="pasteArea" placeholder="새벽의 온도 - 서하&#10;Night Bus - 문라이트 클럽&#10;2024-05-01 오후 9:12 · 우리는 여름에 - 파도 소리 - (7회)"></textarea>' +
@@ -4115,7 +4114,7 @@
     out.push('곡의 좌표 <b>긍정도 ' + signed(t.v) + ' · 에너지 ' + signed(t.a) + '</b> — 목표와 일치 <b>' + Math.round(t.match * 100) + '%</b>');
     var ctx = topContext(t);
     if (ctx && CONTEXT_BY_ID[ctx]) out.push('주로 <b>' + esc(CONTEXT_BY_ID[ctx].label) + '</b> 때 들었어요');
-    if (nowSlot && t.slots[nowSlot]) out.push('지금 시간대(' + SLOT_BY_ID[nowSlot].short + ')에 들은 기록 ' + Math.round(t.slots[nowSlot]) + '건');
+    if (nowSlot && t.slots[nowSlot] >= 1) out.push('지금 시간대(' + SLOT_BY_ID[nowSlot].short + ')에 들은 기록 ' + Math.round(t.slots[nowSlot]) + '건');
     var plats = Object.keys(t.platforms || {}).sort(function (x, y) { return t.platforms[y] - t.platforms[x]; }).slice(0, 2);
     if (plats.length) out.push(plats.map(function (p) { return '<b>' + esc(platformLabel(p)) + '</b>'; }).join(' · ') + '에서 들은 곡');
     if (t.highN >= 2) out.push('확신도 ‘확실해요’ 기록 ' + t.highN + '건');
