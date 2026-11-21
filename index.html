@@ -867,10 +867,10 @@
   <section id="view-review" role="tabpanel" aria-labelledby="tab-review" hidden>
     <div class="card">
       <div class="card-head">
-        <h2 class="card-title">들으면서 정리하기</h2>
+        <h2 class="card-title">곡 정리</h2>
         <span class="card-desc" id="reviewScope" style="margin:0"></span>
       </div>
-      <p class="card-desc">올린 시청 기록의 곡마다 <b>초벌 감정</b>을 자동으로 붙여 두었습니다. 곡을 들으면서 세부 감정을 고치고 <b>확인 완료</b>를 누르면 확정돼요. 한 곡씩 천천히, 나중에 이어서 하셔도 됩니다.</p>
+      <p class="card-desc">곡마다 붙은 초벌 감정을 들으면서 고치고 <b>확인 완료</b>를 누르면 확정돼요.</p>
       <div class="data-row">
         <button class="btn primary small" type="button" id="autoTagBtn">시청 기록에서 초벌 분류 만들기</button>
         <button class="btn small" type="button" id="reviewAllBtn">전체</button>
@@ -1200,6 +1200,7 @@
     reviewIndex: 0,
     reviewAll: false,
     fromSeed: false,
+    seedPersisted: null,
     storageWarned: false,
     seed: null,
     selectedContexts: [],
@@ -1898,10 +1899,10 @@
       /* 번호·글머리표 제거: "1. ", "- ", "• " */
       line = line.replace(/^\d{1,3}[.)]\s+/, '').replace(/^[-•·*]\s+/, '').trim();
 
-      /* 앞에 붙은 날짜 */
+      /* 앞에 붙은 날짜 (2024-05-01 / 2024-05-01 오후 9:12 · ...) */
       var when = null;
-      var dm = line.match(/^(\d{4}[.\-\/]\s*\d{1,2}[.\-\/]\s*\d{1,2}(?:\s+\d{1,2}:\d{2})?)\s*[|,)}\]]\s*/);
-      if (dm) { when = parseWhen(dm[1], false); line = line.slice(dm[0].length).trim(); }
+      var dm = line.match(/^(\d{4}[.\-\/]\s*\d{1,2}[.\-\/]\s*\d{1,2}(?:\s*(?:오전|오후)?\s*\d{1,2}\s*[:시]\s*\d{1,2}\s*분?)?)\s*(?:[·|,)\]}]+|\s[-–—]\s)?\s*/);
+      if (dm && dm[1]) { when = parseWhen(dm[1], false); line = line.slice(dm[0].length).trim(); }
       if (!line) continue;
 
       /* 뒤에 붙은 횟수: "(12회)", "x3", "\t12" */
@@ -1916,7 +1917,7 @@
         line = line.slice(0, line.length - xm[0].length).trim();
       }
 
-      var parts = line.split(/\s+[–—\-|]\s+|\t+|\s{3,}/).map(function (s) { return s.trim(); }).filter(Boolean);
+      var parts = line.replace(/\s*[-–—|·]\s*$/, '').trim().split(/\s+[–—\-|]\s+|\t+|\s{3,}/).map(function (s) { return s.trim(); }).filter(Boolean);
       if (!parts.length) { bad++; continue; }
       var title, artist;
       if (parts.length === 1) {
@@ -2695,8 +2696,8 @@
         '<span class="tlast">' + esc(tail) + '</span></span>' +
         '</button>';
     }).join('');
-    $('#tracksFoot').textContent = '1위 ' + top[0].title + ' · ' + num(top[0].count) + '회 (2위의 ' +
-      (top[1] ? Math.round(top[0].count / top[1].count * 10) / 10 + '배' : '-') + ')';
+    $('#tracksFoot').textContent = '1위 ' + top[0].title + ' · ' + num(top[0].count) + '회' +
+      (top[1] && top[1].count ? ' (2위의 ' + (top[0].count / top[1].count).toFixed(1) + '배)' : '');
     $$('#topTracks .trow').forEach(function (row) {
       row.addEventListener('click', function () {
         prefillSong(row.getAttribute('data-title'), row.getAttribute('data-artist'));
@@ -3768,9 +3769,14 @@
      8. 저장 / 내보내기 / 가져오기
      ============================================================ */
   function renderStorageNote() {
-    var text = state.storageOK
-      ? '이 브라우저에 마음 <b>' + num(state.entries.length) + '개</b>' + (state.dataset ? '와 시청 기록' : '') + '이 저장돼 있어요.'
-      : '<b>이 브라우저에서는 자동 저장이 막혀 있어요.</b> 지금 화면에만 남으니 작업 후 내보내기로 보관해 주세요.';
+    var text;
+    if (!state.storageOK) {
+      text = '<b>이 브라우저에서는 자동 저장이 막혀 있어요.</b> 지금 화면에만 남으니 작업 후 내보내기로 보관해 주세요.';
+    } else if (state.fromSeed && state.seedPersisted === false) {
+      text = '기본 공개 기록이 화면에 실려 있어요. 저장 공간이 모자라 새로고침하면 처음 상태로 돌아가요.';
+    } else {
+      text = '이 브라우저에 마음 <b>' + num(state.entries.length) + '개</b>' + (state.dataset ? '와 시청 기록' : '') + '이 저장돼 있어요.';
+    }
     var a = $('#storageNote');
     var b = $('#storageNote2');
     if (a) a.innerHTML = text;
@@ -4654,17 +4660,17 @@
           var plats = {};
           p.entries.forEach(function (e) { if (e.platform) plats[e.platform] = 1; });
           var platNames = Object.keys(plats).map(function (k) { return platformShort(k); }).join(' · ') || '—';
-          return '<tr><td class="nm">' + esc(p.nickname || p.code) + (p.mine ? ' <span style="color:var(--muted);font-size:10.5px">(나)</span>' : '') + '</td>' +
-            '<td class="num">' + p.entries.length + '</td>' +
-            '<td class="num">' + Object.keys(songN).length + '</td>' +
-            '<td class="num">' + labelsN + '</td>' +
-            '<td>' + (m ? m.emoji + ' ' + m.label : '-') + '</td>' +
-            '<td class="num">' + (Math.round(avgInt * 10) / 10) + '</td>' +
-            '<td class="num">' + (Math.round(avgConf * 100) / 100) + '</td>' +
-            '<td>' + esc(platNames) + '</td>' +
-            '<td>' + (p.demo ? '예시' : p.mine ? '이 브라우저' : '친구 파일') + '</td></tr>';
+          return '<tr><td class="nm" data-th="사람">' + esc(p.nickname || p.code) + (p.mine ? ' <span style="color:var(--muted);font-size:10.5px">(나)</span>' : '') + '</td>' +
+            '<td class="num" data-th="기록">' + p.entries.length + '</td>' +
+            '<td class="num" data-th="곡">' + Object.keys(songN).length + '</td>' +
+            '<td class="num" data-th="감정">' + labelsN + '</td>' +
+            '<td data-th="대표 감정">' + (m ? m.emoji + ' ' + m.label : '-') + '</td>' +
+            '<td class="num" data-th="평균 강도">' + (Math.round(avgInt * 10) / 10) + '</td>' +
+            '<td class="num" data-th="확신도">' + (Math.round(avgConf * 100) / 100) + '</td>' +
+            '<td data-th="플랫폼">' + esc(platNames) + '</td>' +
+            '<td data-th="출처">' + (p.demo ? '예시' : p.mine ? '이 브라우저' : '친구 파일') + '</td></tr>';
         }).join('');
-        table.innerHTML = '<table class="dt"><thead><tr><th>사람</th><th>기록</th><th>곡</th><th>감정</th><th>대표 감정</th><th>평균 강도</th><th>확신도</th><th>플랫폼</th><th>출처</th></tr></thead><tbody>' + body + '</tbody></table>';
+        table.innerHTML = '<table class="dt stack"><thead><tr><th>사람</th><th>기록</th><th>곡</th><th>감정</th><th>대표 감정</th><th>평균 강도</th><th>확신도</th><th>플랫폼</th><th>출처</th></tr></thead><tbody>' + body + '</tbody></table>';
       }
     }
 
@@ -4867,6 +4873,12 @@
       if (Array.isArray(seed.entries)) state.entries = seed.entries.map(function (e) { return normalizeEntry(e); });
       if (seed.dataset) state.dataset = seed.dataset;
       state.fromSeed = true;
+      /* 첫 방문이면 기본 기록을 저장해 두어 새로고침해도 이어진다 (공간이 모자라면 화면에만) */
+      var wasOK = state.storageOK;
+      var okDs = saveJSON(KEY_DATASET, state.dataset);
+      var okEn = saveJSON(KEY_ENTRIES, state.entries);
+      state.storageOK = wasOK;
+      state.seedPersisted = !!(okDs && okEn);
     }
 
     // 날짜 기본값
