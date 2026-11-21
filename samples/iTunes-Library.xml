@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Major Version</key><integer>1</integer>
+  <key>Tracks</key>
+  <dict>
+    <key>1</key>
+    <dict>
+      <key>Track ID</key><integer>1</integer>
+      <key>Name</key><string>새벽의 온도</string>
+      <key>Artist</key><string>서하</string>
+      <key>Album</key><string>새벽의 방</string>
+      <key>Play Count</key><integer>12</integer>
+      <key>Play Date</key><integer>795600000</integer>
+    </dict>
+    <key>2</key>
+    <dict>
+      <key>Track ID</key><integer>2</integer>
+      <key>Name</key><string>Night Bus</string>
+      <key>Artist</key><string>문라이트 클럽</string>
+      <key>Album</key><string>도시의 밤</string>
+      <key>Play Count</key><integer>7</integer>
+      <key>Play Date</key><integer>795700000</integer>
+    </dict>
+  </dict>
+</dict>
+</plist>

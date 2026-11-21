@@ -142,13 +142,16 @@
   /* ---------- tabs ---------- */
   .tabs{
     position:sticky;top:62px;z-index:20;
-    display:grid;grid-template-columns:repeat(5,1fr);gap:3px;
+    display:flex;gap:3px;overflow-x:auto;-webkit-overflow-scrolling:touch;
     max-width:660px;margin:22px auto 20px;padding:4px;
     background:var(--surface);border:1px solid var(--line);
     border-radius:999px;box-shadow:var(--shadow);
+    scrollbar-width:none;
   }
+  .tabs::-webkit-scrollbar{display:none}
   .tab{
-    padding:9px 4px;border-radius:999px;
+    flex:1 1 auto;min-width:0;
+    padding:9px 10px;border-radius:999px;
     font-size:12.8px;font-weight:600;color:var(--muted);white-space:nowrap;
     display:flex;align-items:center;justify-content:center;gap:6px;
     transition:background .18s ease,color .18s ease;
@@ -466,6 +469,15 @@
     .range-label{min-width:64px}
     .intake.loaded{flex-direction:column;align-items:stretch;gap:10px}
     .save-note{margin-left:0;width:100%}
+    /* 아이폰에서는 비교 표를 카드처럼 펼친다 — 한 글자씩 세로로 쪼개지지 않게 */
+    table.dt.stack{min-width:0;width:100%;font-size:12px}
+    table.dt.stack thead{display:none}
+    table.dt.stack tr{display:block;padding:10px 12px;border-bottom:1px solid var(--line)}
+    table.dt.stack tr:last-child{border-bottom:0}
+    table.dt.stack td{display:block;padding:2px 0;border:0;line-height:1.5}
+    table.dt.stack td::before{content:attr(data-th);display:block;font-size:10.5px;color:var(--muted);letter-spacing:.02em}
+    table.dt.stack td.nm{font-size:13px;font-weight:700}
+    table.dt.stack td.nm::before{content:none}
   }
   @media (prefers-reduced-motion:reduce){
     *{transition-duration:.01ms !important;animation-duration:.01ms !important}
@@ -547,7 +559,7 @@
   .recmap .tag{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:2px 7px;font-variant-numeric:tabular-nums}
 
   .datatable{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:8px;border:1px solid var(--line);border-radius:12px}
-  table.dt{border-collapse:collapse;width:100%;min-width:560px;font-size:11.5px}
+  table.dt{border-collapse:collapse;width:100%;min-width:600px;font-size:11.5px}
   table.dt th,table.dt td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.55}
   table.dt th{background:var(--surface-2);font-weight:700;color:var(--ink-soft);white-space:nowrap}
   table.dt tr:last-child td{border-bottom:0}
@@ -577,6 +589,26 @@
   .opt{font-weight:500;color:var(--muted)}
   .tagline{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
   .tagline .t{font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:7px;padding:1px 6px}
+
+  /* ---- 멀티 플랫폼 ---- */
+  .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:8px;margin-top:10px}
+  .pcard{border:1px solid var(--line);border-radius:13px;padding:10px 11px;background:var(--surface);display:grid;gap:4px;align-content:start}
+  .pcard .pn{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--ink)}
+  .pcard .pd{font-size:10.5px;color:var(--muted);line-height:1.5;word-break:break-word}
+  .pcard .pacts{display:flex;gap:5px;margin-top:3px;flex-wrap:wrap}
+  .pcard .pacts .btn{padding:4px 8px;font-size:10.5px}
+  .pcard .psteps{margin:2px 0 0;padding-left:15px;font-size:10.5px;color:var(--ink-soft);line-height:1.6}
+  .pdot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+  .pchip{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:650;border-radius:7px;padding:1px 6px;border:1px solid var(--line);color:var(--ink-soft);background:var(--surface-2);white-space:nowrap}
+  .pchip .pdot{width:6px;height:6px}
+  .pchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+  .pastebox textarea{min-height:118px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.65}
+  .mapgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:10px}
+  .mapprev{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin-top:10px}
+  .mapprev table{border-collapse:collapse;font-size:10.5px;white-space:nowrap}
+  .mapprev th,.mapprev td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+  .mapprev th{background:var(--surface-2);color:var(--ink-soft);font-weight:700}
+  .srcrow{font-size:11px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:5px}
 </style>
 </head>
 <body>
@@ -597,18 +629,19 @@
 <div class="wrap">
 
   <section class="hero">
-    <span class="hero-eyebrow">YOUTUBE MUSIC × 마음 기록</span>
+    <span class="hero-eyebrow">MULTI-PLATFORM × 마음 기록</span>
     <h1>무엇을, 언제, <em>왜</em> 들었는지</h1>
-    <p>내가 가장 많이 반복한 노래와 그 노래를 듣던 시간, 그리고 그때의 마음을 한곳에 모아 둡니다.</p>
+    <p>YouTube Music·Spotify·Apple Music·멜론·지니·FLO — 어디서 들었든. 가장 많이 반복한 노래와 그 노래를 듣던 시간, 그리고 그때의 마음을 한곳에 모아 둡니다.</p>
     <div class="hero-meta" id="heroMeta"></div>
   </section>
 
   <nav class="tabs" role="tablist" aria-label="화면 전환">
     <button class="tab" role="tab" id="tab-analyze" data-tab="analyze" aria-selected="true" aria-controls="view-analyze" type="button">분석</button>
-    <button class="tab" role="tab" id="tab-record" data-tab="record" aria-selected="false" aria-controls="view-record" type="button">기분 기록</button>
+    <button class="tab" role="tab" id="tab-record" data-tab="record" aria-selected="false" aria-controls="view-record" type="button">기록</button>
+    <button class="tab" role="tab" id="tab-review" data-tab="review" aria-selected="false" aria-controls="view-review" type="button">정리</button>
     <button class="tab" role="tab" id="tab-collection" data-tab="collection" aria-selected="false" aria-controls="view-collection" type="button">모아보기</button>
     <button class="tab" role="tab" id="tab-recommend" data-tab="recommend" aria-selected="false" aria-controls="view-recommend" type="button">추천</button>
-    <button class="tab" role="tab" id="tab-data" data-tab="data" aria-selected="false" aria-controls="view-data" type="button">연구 데이터</button>
+    <button class="tab" role="tab" id="tab-data" data-tab="data" aria-selected="false" aria-controls="view-data" type="button">데이터</button>
   </nav>
 
   <!-- ============ ANALYZE ============ -->
@@ -616,23 +649,12 @@
 
     <div class="card intake" id="intake">
       <div class="big-ico" aria-hidden="true">♫</div>
-      <h2>시청 기록을 올려 주세요</h2>
-      <p>구글 테이크아웃에서 받은 <b>watch-history.json</b>을 그대로 넣으면, YouTube Music 기록만 골라 분석해요.</p>
+      <h2>음악 기록을 올려 주세요</h2>
+      <p>YouTube Music · Spotify · Apple Music · 멜론 · 지니 · FLO · 벅스 · 바이브 — 어디서 들었든 분석해요.</p>
       <div class="btn-row">
-        <button class="btn primary" type="button" id="pickFileBtn">내 watch-history.json 올리기</button>
+        <button class="btn primary" type="button" id="pickFileBtn">파일 올리기</button>
         <button class="btn" type="button" id="sampleBtn">샘플로 둘러보기</button>
       </div>
-      <p class="hint">기록이 없어도 괜찮아요 — 샘플로 먼저 둘러보고, 감정 기록은 지금부터 쌓아도 됩니다.</p>
-      <details class="howto">
-        <summary>기록 파일은 어떻게 받나요?</summary>
-        <ol>
-          <li><a href="https://takeout.google.com" target="_blank" rel="noopener">takeout.google.com</a> → <b>모두 선택 해제</b> 후 <b>YouTube 및 YouTube Music</b>만 선택</li>
-          <li><b>여러 형식</b> → <code>history</code> 항목을 <b>JSON</b>으로 변경 (기본값은 HTML이에요)</li>
-          <li>내보내기 → 도착한 ZIP 압축 해제 → <code>Takeout/YouTube and YouTube Music/history/watch-history.json</code></li>
-          <li>그 파일을 여기에 올리면 끝! (파일은 브라우저 안에서만 처리되고 어디에도 전송되지 않아요)</li>
-        </ol>
-        <p class="hint" style="margin:8px 0 0;text-align:left">아이폰은 <b>파일</b> 앱에서 내려받은 ZIP을 탭하면 압축이 풀려요.</p>
-      </details>
     </div>
 
     <div id="dashboard" hidden>
@@ -649,6 +671,27 @@
           <div class="haxis" id="hoursAxis" aria-hidden="true"></div>
         </div>
         <div class="chart-note" id="hoursNote"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">시간대별 감정 결</h2>
+          <span class="card-desc" style="margin:0">새벽 · 오전 · 오후 · 저녁</span>
+        </div>
+        <p class="card-desc">같은 곡도 언제 들었느냐에 따라 다른 마음으로 남아요. 시간대마다 어떤 감정이 많은지 봅니다.</p>
+        <div class="kv" id="bandPlays"></div>
+        <div class="section-label" style="margin:16px 4px 6px">기록된 마음의 시간대</div>
+        <div class="kv" id="bandMoods"></div>
+        <p class="list-foot" id="bandNote"></p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">플랫폼별 분포</h2>
+          <span class="card-desc" style="margin:0" id="platformScope"></span>
+        </div>
+        <p class="card-desc">YouTube Music·Spotify·Apple Music·멜론·지니·FLO·벅스·바이브 — 어디서 들었는지도 기록에 남아요.</p>
+        <div class="kv" id="platformDist"></div>
       </div>
 
       <div class="card">
@@ -698,28 +741,25 @@
 
     <div class="card" id="criteriaCard">
       <div class="card-head">
-        <h2 class="card-title">기분은 이렇게 분류해요</h2>
-        <button class="btn ghost small" type="button" id="critToggle" aria-expanded="false">기준 자세히</button>
+        <h2 class="card-title">마음 고르기</h2>
+        <button class="btn ghost small" type="button" id="critToggle" aria-expanded="false">설명</button>
       </div>
-      <p class="card-desc">공개 음악 감정 데이터셋이 공통으로 쓰는 두 축 — <b>긍정도(얼마나 기분 좋은가)</b> × <b>에너지(얼마나 활기찬가)</b> — 로 네 칸을 나누고, 그 안에 우리말 감정 여덟 개를 두었어요. 사분면을 누르면 그 칸의 감정으로 내려가요.</p>
+      <p class="card-desc">기분 좋은지 × 힘이 있는지, 네 칸 중 하나를 고르면 감정이 나옵니다.</p>
       <div class="quadmap" id="quadMap"></div>
       <div class="axisnote">
-        <span>→ 가로축 <b>긍정도</b> 낮음 ↔ 높음</span>
-        <span>↑ 세로축 <b>에너지</b> 낮음 ↔ 높음</span>
+        <span>→ 가로 <b>긍정도</b> 낮음 ↔ 높음</span>
+        <span>↑ 세로 <b>에너지</b> 낮음 ↔ 높음</span>
       </div>
       <div id="critMore" hidden>
-        <div class="section-label" style="margin:18px 4px 6px">체크하는 순서</div>
+        <div class="section-label" style="margin:16px 4px 6px">기록하는 순서</div>
         <ol class="steps">
-          <li><b>언제였나</b> — 날짜와 시간대(아침·낮·저녁·새벽)를 고릅니다. 같은 곡도 시간대에 따라 다른 기분으로 남기기 때문이에요.</li>
-          <li><b>어떤 곡이었나</b> — 시청 기록에서 골라도 되고, 직접 적어도 됩니다.</li>
-          <li><b>어느 칸이었나</b> — 먼저 ‘기분이 좋았나/나빴나’, ‘몸과 머리가 활기찼나/가라앉았나’를 떠올려 사분면을 정하고, 그 칸의 감정을 하나 이상 고릅니다.</li>
-          <li><b>얼마나 강했나</b> — 강도 1(아주 옅게)~5(아주 진하게).</li>
-          <li><b>어떤 상황이었나</b> — 이동·공부·운동·휴식·잠들기 전처럼 듣던 맥락을 고릅니다(복수 선택).</li>
-          <li><b>얼마나 확신하나</b> — ‘확실해요 / 그런 편이에요 / 잘 모르겠어요’. 확신도는 통계와 추천에서 기록의 무게로 쓰입니다.</li>
+          <li><b>언제</b> — 날짜와 시간대.</li>
+          <li><b>무슨 곡</b> — 시청 기록에서 고르거나 직접 입력.</li>
+          <li><b>어느 칸</b> — 기분과 에너지로 사분면을 정하고 감정을 하나 이상.</li>
+          <li><b>세부 감정</b> — 신남·화남·슬픔·수면 계열로 한 번 더 쪼개기.</li>
+          <li><b>강도·상황·확신도</b> — 1~5, 듣던 맥락, 얼마나 확실한지.</li>
         </ol>
-        <div class="notebox" style="margin-top:14px">
-          <b>왜 이 기준인가요?</b> 감정을 두 축으로 놓는 방식은 Russell(1980)의 <i>circumplex model</i> 이후 음악 감정 인식(MER) 연구의 표준에 가깝습니다. DEAM·AMG1608·PMEmo는 긍정도/에너지 연속값으로, MoodyLyrics·4Q-emotion은 이 두 축으로 나눈 <b>4사분면</b>으로 라벨을 붙였어요. 우리는 여기에 <b>듣던 맥락</b>과 <b>확신도</b>를 더해, ‘이 곡이 슬픈 곡이라서’가 아니라 <b>‘내가 이 곡을 이 기분으로 들었다’</b>를 기록합니다. 조사한 데이터셋 비교는 <b>연구 데이터</b> 탭에 있어요.
-        </div>
+        <p class="hint" style="margin:10px 0 0">곡이 주는 느낌이 아니라 <b>내가 그때 느낀 마음</b>을 남깁니다.</p>
       </div>
     </div>
 
@@ -728,7 +768,7 @@
         <h2 class="card-title" id="formTitle">오늘의 마음 남기기</h2>
         <button class="btn ghost small" type="button" id="cancelEditBtn" hidden>수정 취소</button>
       </div>
-      <p class="card-desc">어떤 노래를 들었을 때, 기분은 어땠나요? 여섯 칸만 채우면 됩니다.</p>
+      <p class="card-desc">어떤 노래를 들었을 때, 마음이 어땠는지 남겨 두세요.</p>
 
       <form id="moodForm" novalidate>
         <div class="grid-2">
@@ -756,6 +796,11 @@
         <div class="chips" id="quickSongs" style="margin:-4px 0 12px"></div>
         <div class="hintline" id="songHint" style="margin:-8px 0 12px"></div>
 
+        <div class="field" style="margin-top:-4px">
+          <label for="fPlatform">들은 곳 <span style="font-weight:500;color:var(--muted)">(선택 — 어느 플랫폼에서 들었나요)</span></label>
+          <select id="fPlatform"></select>
+        </div>
+
         <div class="field">
           <label>③ 그때의 마음 <span style="font-weight:500;color:var(--muted)">(여러 개 고를 수 있어요)</span></label>
           <div id="moodChips" role="group" aria-label="감정 선택"></div>
@@ -763,7 +808,14 @@
         </div>
 
         <div class="field">
-          <label for="fIntensity">④ 강도</label>
+          <label>④ 세부 감정 <span style="font-weight:500;color:var(--muted)">(선택 · 여러 개)</span></label>
+          <p class="card-desc" style="margin:-2px 0 8px">기본 감정만으로 아쉬울 때 — 신남·화남·슬픔·수면 계열로 한 번 더 쪼개 두면 나중에 들으면서 정리하기 쉬워요.</p>
+          <div id="subChips"></div>
+          <div class="hintline" id="subHint">세부 감정을 고르면 위 기본 감정도 함께 선택돼요.</div>
+        </div>
+
+        <div class="field">
+          <label for="fIntensity">⑤ 강도</label>
           <div class="intensity">
             <input type="range" id="fIntensity" name="intensity" min="1" max="5" step="1" value="3" aria-describedby="rangeLabel">
             <span class="range-label" id="rangeLabel">보통</span>
@@ -772,12 +824,12 @@
         </div>
 
         <div class="field">
-          <label>⑤ 어떤 상황이었나요? <span style="font-weight:500;color:var(--muted)">(선택)</span></label>
+          <label>⑥ 어떤 상황이었나요? <span style="font-weight:500;color:var(--muted)">(선택)</span></label>
           <div class="chips" id="contextChips" role="group" aria-label="청취 맥락"></div>
         </div>
 
         <div class="field">
-          <label>⑥ 이 기록, 얼마나 확신하나요?</label>
+          <label>⑦ 이 기록, 얼마나 확신하나요?</label>
           <div class="seg" id="confSeg" role="group" aria-label="확신도"></div>
           <div class="hintline">확신도가 높은 기록일수록 통계와 추천에서 더 크게 반영돼요.</div>
         </div>
@@ -811,6 +863,24 @@
     </div>
   </section>
 
+  <!-- ============ REVIEW (listen & tidy) ============ -->
+  <section id="view-review" role="tabpanel" aria-labelledby="tab-review" hidden>
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">들으면서 정리하기</h2>
+        <span class="card-desc" id="reviewScope" style="margin:0"></span>
+      </div>
+      <p class="card-desc">올린 시청 기록의 곡마다 <b>초벌 감정</b>을 자동으로 붙여 두었습니다. 곡을 들으면서 세부 감정을 고치고 <b>확인 완료</b>를 누르면 확정돼요. 한 곡씩 천천히, 나중에 이어서 하셔도 됩니다.</p>
+      <div class="data-row">
+        <button class="btn primary small" type="button" id="autoTagBtn">시청 기록에서 초벌 분류 만들기</button>
+        <button class="btn small" type="button" id="reviewAllBtn">전체</button>
+        <button class="btn small" type="button" id="reviewUnconfirmedBtn">미확인만</button>
+      </div>
+      <div class="hintline" id="reviewNote"></div>
+    </div>
+    <div class="card" id="reviewCard"></div>
+  </section>
+
   <!-- ============ COLLECTION ============ -->
   <section id="view-collection" role="tabpanel" aria-labelledby="tab-collection" hidden>
     <div class="card">
@@ -839,7 +909,7 @@
       <div class="card-head">
         <h2 class="card-title">지금 마음에 맞는 곡 찾기</h2>
       </div>
-      <p class="card-desc">내가 <b>어떤 곡을 어떤 기분·상황에서 들었는지</b> 쌓인 기록을 세어, 지금 마음과 가장 잘 맞는 곡을 <b>근거와 함께</b> 골라 줍니다. 친구들이 보낸 파일을 합치면 그 사람들의 패턴도 같이 봐요.</p>
+      <p class="card-desc">지금 마음과 가장 잘 맞는 곡을, 내 기록을 근거로 골라 줍니다.</p>
 
       <div class="field">
         <label>지금 기분 <span class="opt">(한 가지 이상)</span></label>
@@ -859,12 +929,11 @@
       </div>
 
       <div class="notebox" id="recWhyBox" hidden style="margin-top:12px">
-        <b>추천은 이렇게 계산해요</b>
+        <b>고르는 방식</b>
         <ul>
-          <li>기분 라벨을 <b>긍정도·에너지 좌표</b>로 바꿉니다(감정 8개마다 좌표가 정해져 있어요).</li>
-          <li>곡마다 기록된 라벨을 <b>확신도 × 강도</b>만큼 무겁게 평균해 ‘이 곡을 들을 때의 좌표’를 만듭니다.</li>
-          <li>지금 고른 기분과 목표(이어가기·끌어올리기·진정시키기) 사이의 거리, 기록의 두께, 지금 시간대에 들었던 곡인지를 합쳐 점수를 냅니다.</li>
-          <li>점수가 높아도 <b>근거가 약한 곡은 뒤로</b> 밀립니다. 왜 추천했는지를 같이 보여 주는 이유예요.</li>
+          <li>감정을 긍정도·에너지 좌표로 바꿔 곡마다 평균을 냅니다.</li>
+          <li>지금 마음과 목표(이어가기·끌어올리기·진정시키기)에 가까운 곡, 기록이 두터운 곡을 위로 올립니다.</li>
+          <li>왜 골랐는지 근거도 함께 보여 줍니다.</li>
         </ul>
       </div>
 
@@ -878,48 +947,48 @@
   <section id="view-data" role="tabpanel" aria-labelledby="tab-data" hidden>
     <div class="card">
       <div class="card-head">
-        <h2 class="card-title">참여자 설정</h2>
+        <h2 class="card-title">내 코드</h2>
         <span class="card-desc" style="margin:0">이름 대신 익명 코드</span>
       </div>
-      <p class="card-desc">친구들이 각자 자기 휴대폰에서 기록하고 파일을 보내면, 파일마다 이 코드로 누구의 기록인지 구분합니다. 이름은 필수가 아니고, 별명도 내보낼 때 넣을지 고를 수 있어요.</p>
+      <p class="card-desc">친구와 기록을 모을 때 나를 구분하는 코드예요.</p>
       <div class="grid-2">
         <div class="field" style="margin-bottom:6px">
           <label for="pNick">별명 <span class="opt">(선택)</span></label>
           <input type="text" id="pNick" maxlength="20" placeholder="예: 민지" autocomplete="off">
         </div>
         <div class="field" style="margin-bottom:6px">
-          <label>내 참여자 코드</label>
+          <label>내 코드</label>
           <div class="copyrow"><span class="code" id="pCode">-</span><button class="btn small" type="button" id="pCopy">복사</button></div>
         </div>
       </div>
-      <p class="hintline" style="font-size:11.5px;color:var(--muted);margin-top:8px">코드는 이 브라우저에서 자동으로 만들어집니다. <button class="mini" type="button" id="pNew" style="text-decoration:underline">코드 새로 만들기</button></p>
-      <label class="chk"><input type="checkbox" id="pShareNick"> 내보낼 때 별명도 함께 보내기 (끄면 코드만 담겨요)</label>
+      <p class="hintline" style="font-size:11.5px;color:var(--muted);margin-top:8px">코드는 이 브라우저에서 자동으로 만들어져요. <button class="mini" type="button" id="pNew" style="text-decoration:underline">새로 만들기</button></p>
+      <label class="chk"><input type="checkbox" id="pShareNick"> 별명도 함께 보내기 (끄면 코드만 담겨요)</label>
     </div>
 
     <div class="card">
       <div class="card-head">
-        <h2 class="card-title">① 연구용 라벨 데이터 내보내기</h2>
+        <h2 class="card-title">① 내 기록 내보내기</h2>
       </div>
-      <p class="card-desc">시청 기록 전체가 아니라 <b>연구에 필요한 항목만</b> 나갑니다 — 날짜·시간대·곡명·아티스트·감정 라벨·긍정도/에너지·강도·확신도·맥락. 시청 시각 원본과 메모는 기본으로 빠져요.</p>
-      <label class="chk"><input type="checkbox" id="expMemo"> 한 줄 메모도 포함하기 (내가 쓴 문장이 그대로 담겨요)</label>
+      <p class="card-desc">날짜·시간대·곡·감정·강도·확신도만 담아요. 시청 시각 원본과 메모는 기본으로 빠집니다.</p>
+      <label class="chk"><input type="checkbox" id="expMemo"> 메모도 포함하기</label>
       <div class="data-row" style="margin-top:12px">
-        <button class="btn small primary" type="button" id="expResearchJson">JSON으로 내보내기</button>
-        <button class="btn small" type="button" id="expResearchCsv">CSV(엑셀)로 내보내기</button>
-        <button class="btn small" type="button" id="expSchema">라벨 기준(코드북)</button>
+        <button class="btn small primary" type="button" id="expResearchJson">JSON</button>
+        <button class="btn small" type="button" id="expResearchCsv">CSV</button>
+        <button class="btn small" type="button" id="expSchema">항목 설명</button>
       </div>
       <div class="notebox" style="margin-top:12px" id="exportNote"></div>
     </div>
 
     <div class="card">
       <div class="card-head">
-        <h2 class="card-title">② 친구 파일 합치기</h2>
+        <h2 class="card-title">② 친구 기록 합치기</h2>
         <span class="card-desc" style="margin:0">여러 개 한 번에</span>
       </div>
-      <p class="card-desc">친구가 보내온 JSON 파일을 여러 개 골라 한 번에 불러오면 참여자별로 나눠 담고, 통계와 추천에 함께 씁니다. 파일은 브라우저 안에서만 읽고 어디에도 보내지 않아요.</p>
+      <p class="card-desc">친구가 보낸 파일을 불러와 함께 봐요. 파일은 브라우저 밖으로 나가지 않아요.</p>
       <div class="data-row">
-        <button class="btn small primary" type="button" id="peerPick">친구 파일 불러오기 (여러 개)</button>
-        <button class="btn small" type="button" id="peerDemo">예시 참여자 3명 넣어보기</button>
-        <button class="btn small danger" type="button" id="peerClear">불러온 파일 모두 지우기</button>
+        <button class="btn small primary" type="button" id="peerPick">파일 불러오기</button>
+        <button class="btn small" type="button" id="peerDemo">예시 3명 넣어보기</button>
+        <button class="btn small danger" type="button" id="peerClear">모두 지우기</button>
       </div>
       <div class="peerlist" id="peerList"></div>
       <p class="list-foot" id="peerNote"></p>
@@ -927,51 +996,42 @@
 
     <div class="card">
       <div class="card-head">
-        <h2 class="card-title">③ 통합 데이터 통계</h2>
+        <h2 class="card-title">③ 함께 보기</h2>
         <span class="card-desc" id="dataScope" style="margin:0"></span>
       </div>
-      <p class="card-desc">내 기록과 친구들이 보낸 파일을 합친 결과입니다. 라벨 수는 감정 태그 하나하나를 세고, 확신도 평균도 같이 봅니다.</p>
+      <p class="card-desc">내 기록과 친구 기록을 합친 통계예요.</p>
       <div class="stats" id="dataStats"></div>
       <div class="section-label" style="margin:20px 4px 8px">감정 분포</div>
       <div class="kv" id="moodDist"></div>
       <div class="section-label" style="margin:20px 4px 8px">사분면 분포</div>
       <div class="kv" id="quadDist"></div>
+      <div class="section-label" style="margin:20px 4px 8px">세부 감정 분포</div>
+      <div class="kv" id="subDist"></div>
+      <div class="section-label" style="margin:20px 4px 8px">플랫폼</div>
+      <div class="kv" id="entryPlatformDist"></div>
       <div class="section-label" style="margin:20px 4px 8px">시간대 · 맥락</div>
       <div class="kv" id="slotDist"></div>
-      <div class="section-label" style="margin:20px 4px 8px">참여자별</div>
+      <div class="section-label" style="margin:20px 4px 8px">사람별</div>
       <div class="datatable" id="participantTable"></div>
       <p class="list-foot" id="dataNote"></p>
     </div>
 
     <div class="card">
-      <div class="card-head"><h2 class="card-title">정한 기분 분류 기준</h2></div>
-      <p class="card-desc">교수님 피드백 1번 — “기분 분류가 되어 있는 데이터를 먼저 찾아보고, 없으면 우리만의 기준을” — 에 대한 답입니다. 공개 데이터셋을 조사한 뒤, 그 위에 우리 기준을 얹었어요.</p>
-      <div class="notebox">
-        <b>우리 기준:</b> <b>긍정도(Valence) × 에너지(Arousal)</b> 2축 4사분면 + <b>핵심 감정 8개</b> + <b>듣던 맥락</b> + <b>확신도</b>.<br>
-        라벨 단위는 <b>‘한 사람이 한 곡을 한 번 들은 시점’</b>입니다. 곡에 감정을 붙이는 데이터셋과 달리, <b>누가·언제·어떤 상황에서 그 곡을 그 기분으로 들었는지</b>를 남깁니다.
-      </div>
+      <div class="card-head"><h2 class="card-title">감정 기준</h2></div>
+      <p class="card-desc">긍정도 × 에너지 4사분면 · 감정 8개 · 세부 감정 12개 · 시간대 · 확신도.</p>
       <div class="datatable" id="moodTable"></div>
       <div class="section-label" style="margin:20px 4px 8px">맥락과 확신도</div>
       <div class="kv" id="contextTable"></div>
+      <details class="howto" style="text-align:left;margin-top:16px">
+        <summary>참고한 공개 데이터</summary>
+        <p class="hint" style="text-align:left">감정을 긍정도·에너지 두 축으로 나누는 방식은 공개 음악 감정 데이터에서도 많이 쓰여요. 이름을 누르면 원문으로 갑니다.</p>
+        <div class="datatable" id="dsTable"></div>
+      </details>
     </div>
 
     <div class="card">
-      <div class="card-head"><h2 class="card-title">공개 데이터셋 조사 결과</h2></div>
-      <p class="card-desc">음악에 감정 라벨이 붙은 공개 데이터셋을 비교했습니다. 표의 이름을 누르면 원문으로 가요.</p>
-      <div class="datatable" id="dsTable"></div>
-      <div class="notebox" style="margin-top:12px">
-        <b>조사에서 얻은 세 가지</b>
-        <ul>
-          <li><b>축은 두 개로 충분히 통합니다.</b> DEAM·AMG1608·PMEmo·K-Pop 데이터셋 모두 긍정도/에너지 두 축을 씁니다. 그래서 우리도 이 축을 그대로 씁니다.</li>
-          <li><b>그러나 라벨은 대부분 ‘곡이 표현하는 감정’입니다.</b> DEAM·AMG1608·4Q는 <i>지각된</i> 감정(perceived), Emotify·PMEmo·DEAP만 <i>유발된</i> 감정(induced)입니다. ‘내가 이 곡을 들으며 실제로 느낀 것’을 시간·상황과 함께 모은 데이터는 드물어요. 우리 기록이 채우는 빈칸이 여기입니다.</li>
-          <li><b>사람마다 다르게 느끼고, 한 사람의 판단도 흔들립니다.</b> AMG1608의 평가자 간 일치도는 긍정도 0.31, 에너지 0.46(Krippendorff’s α)이었고, DEAM도 긍정도 라벨의 품질이 에너지보다 낮다고 밝힙니다. 그래서 <b>여러 사람의 기록</b>과 <b>확신도</b>가 필요합니다 — 교수님이 지적한 신뢰성 문제가 바로 여기예요.</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-head"><h2 class="card-title">데이터</h2></div>
-      <p class="card-desc">내 기록과 분석을 통째로 백업하거나 되살릴 때 씁니다.</p>
+      <div class="card-head"><h2 class="card-title">백업</h2></div>
+      <p class="card-desc">기록과 분석을 통째로 저장하거나 되살려요.</p>
       <div class="data-row">
         <button class="btn small" type="button" id="exportBtn3">전체 백업 내보내기</button>
         <button class="btn small" type="button" id="importBtn3">백업 가져오기</button>
@@ -981,19 +1041,20 @@
   </section>
 
   <footer class="foot">
-    <b>모든 데이터는 이 브라우저 안에만 있어요.</b> 업로드한 파일은 서버로 전송되지 않고, 감정 기록은 브라우저 저장소(localStorage)에 남습니다.
+    <b>올린 파일은 이 브라우저 안에만 있어요.</b> 업로드한 기록은 서버로 전송되지 않고, 감정 기록은 브라우저 저장소(localStorage)에 남습니다.
     브라우저 기록을 지우면 함께 사라지니 가끔 <b>내보내기</b>로 백업해 두세요.<br>
-    시청 기록은 곡이 시작된 시각만 담고 있어요. 재생 시간은 기록되지 않고, 반복 횟수와 시간대만 정확히 알 수 있습니다.
+    플랫폼마다 담기는 정보가 달라요 — YouTube Music은 곡이 시작된 시각, Spotify는 재생 길이까지, Apple 보관함 파일은 재생 횟수와 마지막 재생일만 있습니다. 그래서 시간대 차트가 비어 있을 수 있어요.
   </footer>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<input type="file" id="fileInput" accept=".json,application/json" hidden>
+<input type="file" id="fileInput" accept=".json,.csv,.tsv,.txt,.xml,application/json,text/csv,text/plain,application/xml" multiple hidden>
 <input type="file" id="importInput" accept=".json,application/json" hidden>
 <input type="file" id="peerInput" accept=".json,application/json" multiple hidden>
 
 
 
+<script src="data/default-records.js"></script>
 <script>
 (function () {
   'use strict';
@@ -1017,6 +1078,49 @@
     if (!m.quad) m.quad = quadOf(m.v, m.a);
     MOOD_BY_ID[m.id] = m;
   });
+
+  /* 세부 감정 12개: 4계열로 묶어 "더 자세히" 고를 수 있게. 각 세부 감정은 기본 감정 8개 중 하나에 속한다 */
+  var SUB_FAMILIES = [
+    { id: 'up',   label: '신남 계열',        hint: '들떠 있고 리듬 타고 싶을 때' },
+    { id: 'hot',  label: '화남 · 강렬 계열',  hint: '쌓인 것을 쏟아내고 싶을 때' },
+    { id: 'sad',  label: '슬픔 계열',        hint: '가라앉고 먹먹할 때' },
+    { id: 'calm', label: '수면 · 평온 계열',  hint: '잠들기 전·기도·휴식' }
+  ];
+  var SUB_FAMILY_BY_ID = {};
+  SUB_FAMILIES.forEach(function (f) { SUB_FAMILY_BY_ID[f.id] = f; });
+
+  var SUBMOODS = [
+    { id: 'up_tense',    family: 'up',   parent: 'flutter', label: '신남 · 텐션업',        v: 0.70, a: 0.90, desc: '들떠서 몸이 먼저 움직임' },
+    { id: 'up_bright',   family: 'up',   parent: 'happy',   label: '신남 · 산뜻/기분좋음', v: 0.80, a: 0.35, desc: '가볍고 기분 좋게 밝아짐' },
+    { id: 'up_groove',   family: 'up',   parent: 'happy',   label: '신남 · 리듬/그루브',   v: 0.60, a: 0.55, desc: '리듬 타며 흥이 오름' },
+    { id: 'hot_release', family: 'hot',  parent: 'angry',   label: '화남 · 스트레스 해소', v: -0.35, a: 0.75, desc: '쌓인 걸 쏟아내며 풀림' },
+    { id: 'hot_beat',    family: 'hot',  parent: 'angry',   label: '강렬함 · 빡센 비트',   v: -0.10, a: 0.90, desc: '비트가 세게 밀어붙임' },
+    { id: 'hot_vent',    family: 'hot',  parent: 'angry',   label: '짜증 · 분출',          v: -0.70, a: 0.65, desc: '답답하고 부글거림' },
+    { id: 'sad_breakup', family: 'sad',  parent: 'blue',    label: '슬픔 · 이별/그리움',   v: -0.70, a: -0.45, desc: '보고 싶고 아련함' },
+    { id: 'sad_dawn',    family: 'sad',  parent: 'blue',    label: '먹먹함 · 새벽 감성',   v: -0.45, a: -0.30, desc: '가라앉고 먹먹함' },
+    { id: 'sad_lonely',  family: 'sad',  parent: 'blue',    label: '우울 · 위로 필요',     v: -0.80, a: -0.60, desc: '힘없이 가라앉음' },
+    { id: 'calm_sleep',  family: 'calm', parent: 'calm',    label: '잘 때 · 평온/수면',    v: 0.55, a: -0.85, desc: '잠들기 좋게 잔잔함' },
+    { id: 'calm_pray',   family: 'calm', parent: 'calm',    label: '잔잔함 · 기도/휴식',   v: 0.65, a: -0.50, desc: '숨 고르고 마음을 가라앉힘' },
+    { id: 'calm_haze',   family: 'calm', parent: 'soft',    label: '나른함 · 몽환',        v: 0.30, a: -0.35, desc: '몽롱하고 나른함' }
+  ];
+  var SUBMOOD_BY_ID = {};
+  SUBMOODS.forEach(function (s) { SUBMOOD_BY_ID[s.id] = s; });
+
+  /* 시간대 4구간 — 청취 시각으로 감정 패턴이 달라지는 것을 본다 */
+  var TIME_BANDS = [
+    { id: 'dawn',      label: '새벽',      range: '00–05시', hours: [0, 1, 2, 3, 4, 5],     nudge: '새벽에는 슬픔·잠 쪽으로 기운 기록이 많아요' },
+    { id: 'morning',   label: '오전',      range: '06–11시', hours: [6, 7, 8, 9, 10, 11] },
+    { id: 'afternoon', label: '오후',      range: '12–17시', hours: [12, 13, 14, 15, 16, 17] },
+    { id: 'evening',   label: '저녁 · 밤', range: '18–23시', hours: [18, 19, 20, 21, 22, 23] }
+  ];
+  var BAND_BY_ID = {};
+  TIME_BANDS.forEach(function (b) { BAND_BY_ID[b.id] = b; });
+  function bandForHour(h) {
+    for (var i = 0; i < TIME_BANDS.length; i++) {
+      if (TIME_BANDS[i].hours.indexOf(h) !== -1) return TIME_BANDS[i].id;
+    }
+    return 'evening';
+  }
 
   /* 사분면: Russell 모델의 4분면. 표 순서는 2축(가로=긍정도, 세로=에너지) 배치 순 */
   var QUADS = [
@@ -1087,6 +1191,17 @@
     editingId: null,
     visibleEntries: 20,
     selectedMoods: [],
+    selectedSubmoods: [],
+    pasteOrder: 'ta',
+    pastePlatform: 'other',
+    mergeMode: false,
+    mapping: null,
+    reviewMood: null,
+    reviewIndex: 0,
+    reviewAll: false,
+    fromSeed: false,
+    storageWarned: false,
+    seed: null,
     selectedContexts: [],
     confidence: 'mid',
     quadFocus: null,
@@ -1142,15 +1257,29 @@
   }
   function quadOf(v, a) { return v >= 0 ? (a >= 0 ? 'Q1' : 'Q4') : (a >= 0 ? 'Q2' : 'Q3'); }
 
-  /* 기록 하나의 감정 좌표 = 고른 감정들의 평균 */
+  /* 기록 하나의 감정 좌표 = 세부 감정이 있으면 그것들의 평균, 없으면 기본 감정 평균 */
   function entryVA(e) {
     var v = 0, a = 0, n = 0;
-    (e.moods || []).forEach(function (id) {
-      var m = MOOD_BY_ID[id];
-      if (m) { v += m.v; a += m.a; n++; }
+    (e.submoods || []).forEach(function (id) {
+      var s = SUBMOOD_BY_ID[id];
+      if (s) { v += s.v; a += s.a; n++; }
     });
+    if (!n) {
+      (e.moods || []).forEach(function (id) {
+        var m = MOOD_BY_ID[id];
+        if (m) { v += m.v; a += m.a; n++; }
+      });
+    }
     if (!n) return { v: 0, a: 0 };
     return { v: v / n, a: a / n };
+  }
+  function submoodLabels(e) {
+    return (e.submoods || []).map(function (id) { return SUBMOOD_BY_ID[id] ? SUBMOOD_BY_ID[id].label : id; });
+  }
+  function entryStatus(e) {
+    if (e.status === 'confirmed') return 'confirmed';
+    if (e.auto) return 'unconfirmed';
+    return 'manual';
   }
   function confidenceWeight(e) {
     return (CONF_BY_ID[e.confidence] || CONF_BY_ID.mid).w;
@@ -1239,8 +1368,116 @@
   }
 
   /* ============================================================
-     3. 시청 기록 파싱
+     3. 시청 기록 파싱 — 플랫폼을 가리지 않는다
      ============================================================ */
+
+  /* 플랫폼 목록: 파일 형식이 있으면 그대로, 없으면 CSV·붙여넣기로 */
+  var PLATFORMS = [
+    {
+      id: 'youtube_music', label: 'YouTube Music', short: 'YouTube', color: '#d0685c',
+      files: 'watch-history.json (Google Takeout)',
+      steps: [
+        '<a href="https://takeout.google.com" target="_blank" rel="noopener">takeout.google.com</a> → <b>모두 선택 해제</b> 후 <b>YouTube 및 YouTube Music</b>만 선택',
+        '<b>여러 형식</b> → <code>history</code> 항목을 <b>JSON</b>으로 변경 (기본은 HTML)',
+        '내보내기 → 받은 ZIP 풀기 → <code>Takeout/YouTube and YouTube Music/history/watch-history.json</code>'
+      ]
+    },
+    {
+      id: 'spotify', label: 'Spotify', short: 'Spotify', color: '#3f9a63',
+      files: 'StreamingHistory_music_*.json · Streaming_History_Audio_*.json · endsong_*.json',
+      steps: [
+        '<a href="https://www.spotify.com/account/privacy/" target="_blank" rel="noopener">spotify.com/account/privacy</a> (앱은 설정 → 개인정보 보호) → <b>계정 데이터 내려받기</b> 요청',
+        '형식은 <b>Extended streaming history</b>를 고르면 <code>Streaming_History_Audio_*.json</code>, 기본 내보내기는 <code>StreamingHistory_music_*.json</code>이 와요',
+        '며칠 뒤 메일로 온 ZIP을 풀어 JSON을 그대로 올리면 됩니다 (30초 미만으로 넘긴 재생은 빼고 셉니다)'
+      ]
+    },
+    {
+      id: 'apple_music', label: 'Apple Music', short: 'Apple', color: '#c95f8a',
+      files: 'Apple Music Play Activity.csv · Apple Music - Play History Daily Tracks.csv · Library.xml',
+      steps: [
+        '<a href="https://privacy.apple.com" target="_blank" rel="noopener">privacy.apple.com</a> → <b>데이터 및 개인정보 보호 요청</b> → <b>Apple Media Services 정보</b> 다운로드',
+        '받은 ZIP 안의 <code>Apple Music Play Activity.csv</code> 또는 <code>Apple Music - Play History Daily Tracks.csv</code>를 올리기',
+        'Mac·PC의 음악 앱에서 <b>파일 → 보관함 → 보관함 내보내기</b>로 만든 <code>Library.xml</code>도 됩니다 (재생 횟수·마지막 재생일만 있고 시각은 없어요)'
+      ]
+    },
+    {
+      id: 'melon', label: '멜론', short: '멜론', color: '#4aa35b',
+      files: 'CSV·TXT · 목록 붙여넣기',
+      steps: [
+        '멜론 앱·웹의 <b>MY뮤직 → 최근 들은 곡</b>(또는 나의 플레이리스트)을 연다',
+        '공식 내보내기 파일은 없어서, 목록을 한 줄에 <code>곡명 - 아티스트</code> 꼴로 복사해 <b>목록 붙여넣기</b>에 넣는다',
+        '엑셀·구글 스프레드시트로 정리했다면 <b>CSV</b>로 저장해 올리면 열을 자동으로 맞춘다(필요하면 직접 지정)'
+      ]
+    },
+    {
+      id: 'genie', label: '지니', short: '지니', color: '#5b7fc7',
+      files: 'CSV·TXT · 목록 붙여넣기',
+      steps: [
+        '지니 앱 <b>MY → 최근 들은 곡</b>을 연다',
+        '곡 목록을 복사해 <b>목록 붙여넣기</b>에 한 줄씩 넣는다 (<code>곡명 - 아티스트</code> 또는 <code>아티스트 - 곡명</code>, 순서는 화면에서 고른다)',
+        '표로 가지고 있다면 <b>CSV</b>로 저장해 올리기'
+      ]
+    },
+    {
+      id: 'flo', label: 'FLO', short: 'FLO', color: '#7a63c9',
+      files: 'CSV·TXT · 목록 붙여넣기',
+      steps: [
+        'FLO 앱 <b>보관함 → 최근 재생</b> 또는 내 플레이리스트를 연다',
+        '목록을 복사해 <b>목록 붙여넣기</b>에 넣기',
+        '표로 정리했다면 <b>CSV·TSV</b> 업로드 (헤더가 있으면 곡명·아티스트 열을 자동 인식)'
+      ]
+    },
+    {
+      id: 'bugs', label: '벅스', short: '벅스', color: '#c9713f',
+      files: 'CSV·TXT · 목록 붙여넣기',
+      steps: [
+        '벅스 앱·웹의 <b>마이뮤직 → 최근 들은 곡</b>을 연다',
+        '목록을 복사해 <b>목록 붙여넣기</b>에 넣기',
+        '표로 정리했다면 <b>CSV</b> 업로드'
+      ]
+    },
+    {
+      id: 'vibe', label: '바이브', short: '바이브', color: '#3f9aa8',
+      files: 'CSV·TXT · 목록 붙여넣기',
+      steps: [
+        '바이브 앱 <b>MY → 최근 들은 곡</b>을 연다',
+        '목록을 복사해 <b>목록 붙여넣기</b>에 넣기',
+        '표로 정리했다면 <b>CSV</b> 업로드'
+      ]
+    },
+    {
+      id: 'other', label: '기타', short: '기타', color: '#8f93a6',
+      files: 'CSV·TSV·TXT · 붙여넣기 (Last.fm 등)',
+      steps: [
+        'Last.fm은 <a href="https://www.last.fm/user/" target="_blank" rel="noopener">프로필 → 데이터 내려받기</a>로 받은 <code>recenttracks.csv</code>를 그대로 올리면 됩니다',
+        '그 밖의 앱은 <b>CSV/TSV</b>로 저장해 올리거나, 목록을 <b>붙여넣기</b>하세요',
+        '열 이름이 낯설면 업로드 뒤 <b>열 지정</b> 화면에서 곡명·아티스트 열을 직접 고를 수 있어요'
+      ]
+    }
+  ];
+  var PLATFORM_BY_ID = {};
+  PLATFORMS.forEach(function (p) { PLATFORM_BY_ID[p.id] = p; });
+  function platformLabel(id) { return (PLATFORM_BY_ID[id] || PLATFORM_BY_ID.other).label; }
+  function platformShort(id) { return (PLATFORM_BY_ID[id] || PLATFORM_BY_ID.other).short; }
+  function platformColor(id) { return (PLATFORM_BY_ID[id] || PLATFORM_BY_ID.other).color; }
+  function platformChip(id) {
+    if (!id) return '';
+    return '<span class="pchip"><i class="pdot" style="background:' + platformColor(id) + '"></i>' + esc(platformLabel(id)) + '</span>';
+  }
+  function platformFromText(s) {
+    var t = String(s || '').toLowerCase();
+    if (!t) return '';
+    if (/youtube|ytmusic|유튜브/.test(t)) return 'youtube_music';
+    if (/spotify|스포티파이/.test(t)) return 'spotify';
+    if (/apple|itunes|애플/.test(t)) return 'apple_music';
+    if (/melon|멜론/.test(t)) return 'melon';
+    if (/genie|지니/.test(t)) return 'genie';
+    if (/flo/.test(t)) return 'flo';
+    if (/bugs|벅스/.test(t)) return 'bugs';
+    if (/vibe|바이브/.test(t)) return 'vibe';
+    return 'other';
+  }
+
   var TITLE_PREFIXES = [
     /^watched\s+/i,
     /^listened to\s+/i,
@@ -1349,44 +1586,483 @@
       var t = item.time ? new Date(item.time) : null;
       if (!t || isNaN(t.getTime())) continue;
 
-      plays.push({ title: title, artist: artist, t: t });
+      plays.push({ title: title, artist: artist, t: t, exact: true, platform: 'youtube_music' });
     }
 
     return { plays: plays, musicRecords: musicRecords, ignored: ignored, removed: removed, total: list.length };
   }
 
-  /* 재생 목록 → 집계 데이터 */
-  function aggregate(plays, source, sample) {
+  /* ---------- 3-B. 날짜·시각 읽기 ---------- */
+  function pad2s(n) { return String(n).length < 2 ? '0' + n : String(n); }
+
+  /* 여러 플랫폼의 날짜 표기를 하나의 Date로. exact=false면 시각 정보가 없는 날짜만 있는 값 */
+  function parseWhen(raw, assumeUTC) {
+    var s = String(raw == null ? '' : raw).trim();
+    if (!s) return null;
+    var d = null;
+
+    /* 2024-05-01 / 2024.5.1 / 2024/05/01 */
+    var m = s.match(/^(\d{4})[.\-\/]\s*(\d{1,2})[.\-\/]\s*(\d{1,2})\.?$/);
+    if (m) {
+      d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0);
+      return isNaN(d.getTime()) ? null : { t: d, exact: false };
+    }
+
+    /* 한국어 표기: 2024. 5. 1. 오후 3:24 / 2024년 5월 1일 오후 3시 24분 */
+    m = s.match(/(\d{4})[.\-\/년]\s*(\d{1,2})[.\-\/월]\s*(\d{1,2})일?\.?\s*(오전|오후|am|pm)?\s*(\d{1,2})?\s*[:시]?\s*(\d{1,2})?/i);
+    if (m && /[오전오후am|pm]/i.test(s)) {
+      var hh = Number(m[5] || 0);
+      var ampm = String(m[4] || '').toLowerCase();
+      if (ampm === '오후' || ampm === 'pm') { if (hh < 12) hh += 12; }
+      else if (ampm === '오전' || ampm === 'am') { if (hh === 12) hh = 0; }
+      d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), hh, Number(m[6] || 0), 0);
+      return isNaN(d.getTime()) ? null : { t: d, exact: true };
+    }
+
+    /* 2024-05-01 12:34:56 / 2024-05-01T12:34:56 (타임존 없음) */
+    m = s.match(/^(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})[T\s]+(\d{1,2}):(\d{2})(?::(\d{2})(?:\.(\d{1,6}))?)?\s*(Z|[+\-]\d{2}:?\d{2})?$/);
+    if (m) {
+      var iso = m[1] + '-' + pad2s(Number(m[2])) + '-' + pad2s(Number(m[3])) + 'T' +
+        pad2s(Number(m[4])) + ':' + pad2s(Number(m[5])) + ':' + pad2s(Number(m[6] || 0));
+      var off = m[8];
+      if (off) iso += off === 'Z' ? 'Z' : off.replace(/^([+\-]\d{2})(\d{2})$/, '$1:$2');
+      else if (assumeUTC) iso += 'Z';
+      d = new Date(iso);
+      return isNaN(d.getTime()) ? null : { t: d, exact: true };
+    }
+
+    /* 나머지는 브라우저 파서에 맡김 (RFC 2822, ISO 등) */
+    d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      var hasTime = /\d{1,2}:\d{2}/.test(s);
+      return { t: d, exact: hasTime };
+    }
+    return null;
+  }
+
+  /* ---------- 3-C. Spotify 내보내기 ---------- */
+  function looksLikeSpotifyRecord(r) {
+    if (!r || typeof r !== 'object') return false;
+    return r.master_metadata_track_name !== undefined || r.trackName !== undefined ||
+      r.endTime !== undefined || r.ms_played !== undefined || r.msPlayed !== undefined ||
+      r.master_metadata_album_artist_name !== undefined;
+  }
+
+  function parseSpotify(list) {
+    var plays = [], skipped = 0, podcasts = 0, noTime = 0;
+    for (var i = 0; i < list.length; i++) {
+      var r = list[i];
+      if (!r || typeof r !== 'object') continue;
+      var title = r.trackName != null ? r.trackName : (r.master_metadata_track_name != null ? r.master_metadata_track_name : r.track_name);
+      var artist = r.artistName != null ? r.artistName : (r.master_metadata_album_artist_name != null ? r.master_metadata_album_artist_name : r.artist_name);
+      if (!title) {
+        if (r.episodeName || r.master_metadata_episode_title || r.episode_name) podcasts++;
+        continue;
+      }
+      /* 팟캐스트 에피소드는 trackName이 비고 episodeName에 들어간다 */
+      if (r.episodeName || r.episode_name) { podcasts++; continue; }
+      var when = parseWhen(r.ts || r.endTime || r.playedAt || r.time, true);
+      if (!when) { noTime++; continue; }
+      var ms = Number(r.ms_played != null ? r.ms_played : (r.msPlayed != null ? r.msPlayed : r.msPlayedTotal));
+      if (isFinite(ms) && ms > 0 && ms < 30000) { skipped++; continue; }
+      plays.push({
+        title: cleanTitle(String(title)),
+        artist: cleanArtist(artist),
+        t: when.t, exact: when.exact, platform: 'spotify',
+        ms: isFinite(ms) ? ms : 0
+      });
+    }
+    return { plays: plays, skipped: skipped, podcasts: podcasts, noTime: noTime, total: list.length };
+  }
+
+  /* ---------- 3-D. CSV·TSV·TXT ---------- */
+  function splitCSVLine(line, delim) {
+    var out = [], cur = '', q = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line.charAt(i);
+      if (q) {
+        if (ch === '"') {
+          if (line.charAt(i + 1) === '"') { cur += '"'; i++; }
+          else q = false;
+        } else cur += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === delim) { out.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    out.push(cur);
+    return out;
+  }
+
+  function parseDelimitedText(text, delim) {
+    var src = String(text).replace(/^\uFEFF/, '');
+    var rows = [], row = [], cur = '', q = false;
+    for (var i = 0; i < src.length; i++) {
+      var ch = src.charAt(i);
+      if (q) {
+        if (ch === '"') {
+          if (src.charAt(i + 1) === '"') { cur += '"'; i++; }
+          else q = false;
+        } else cur += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === delim) { row.push(cur); cur = ''; }
+      else if (ch === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+      else if (ch === '\r') { /* skip */ }
+      else cur += ch;
+    }
+    if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+    return rows.filter(function (r) {
+      return r.some(function (c) { return String(c).trim() !== ''; });
+    });
+  }
+
+  function detectDelimiter(text) {
+    var line = String(text).replace(/^\uFEFF/, '').split(/\r?\n/).filter(function (l) { return l.trim(); })[0] || '';
+    var best = ',', bestN = 0;
+    [',', '\t', ';', '|'].forEach(function (d) {
+      var n = splitCSVLine(line, d).length;
+      if (n > bestN) { bestN = n; best = d; }
+    });
+    return bestN > 1 ? best : ',';
+  }
+
+  function normHeader(s) {
+    return String(s == null ? '' : s).toLowerCase().replace(/[\s_\-()\[\]\.\/\\]/g, '');
+  }
+
+  /* 열 이름으로 역할 찾기 — 플랫폼마다 이름이 달라서 후보를 넓게 둔다 */
+  var COL_ROLES = [
+    { id: 'event', label: '이벤트(선택)', keys: ['eventtype', 'event', 'action', '이벤트'] },
+    { id: 'when', label: '날짜·시각', keys: ['eventstarttimestamp', 'eventendtimestamp', 'dateplayed', 'playedat', 'playdate', 'playtime', 'timestamp', 'datetime', 'endtime', 'starttime', 'time', 'date', '일시', '날짜', '재생일시', '재생시각', '청취일시', 'ts'] },
+    { id: 'artist', label: '아티스트', keys: ['artistname', 'artist', 'albumartist', '아티스트', '가수', '아티스트명', 'artistname'] },
+    { id: 'title', label: '곡명', keys: ['songname', 'trackname', 'songtitle', 'song', 'track', 'title', 'songtitle', 'name', '곡명', '곡', '노래', '노래제목', '제목', 'itemtitle', 'trackdescription'] },
+    { id: 'ms', label: '재생 길이(ms)', keys: ['playdurationmilliseconds', 'playdurationms', 'playduration', 'msplayed', 'msplayedtotal', '재생시간'] },
+    { id: 'count', label: '재생 횟수', keys: ['playcount', 'playcounts', 'repeatcount', 'plays', 'count', '재생횟수', '재생수', '횟수', '반복횟수'] },
+    { id: 'platform', label: '플랫폼', keys: ['platform', 'service', 'app', 'source', '플랫폼', '서비스'] }
+  ];
+
+  function scoreHeader(header, keys) {
+    var h = normHeader(header);
+    if (!h) return 0;
+    var best = 0;
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      var s = 0;
+      if (h === k) s = 100 - i;
+      else if (h.indexOf(k) === 0) s = 70 - i;
+      else if (h.indexOf(k) !== -1) s = 45 - i;
+      else if (k.indexOf(h) === 0 && h.length >= 2) s = 30 - i;
+      if (s > best) best = s;
+    }
+    return best;
+  }
+
+  function guessMapping(header) {
+    var mapping = {}, used = {};
+    COL_ROLES.forEach(function (role) {
+      var bestIdx = -1, bestScore = 0;
+      for (var i = 0; i < header.length; i++) {
+        if (used[i]) continue;
+        var sc = scoreHeader(header[i], role.keys);
+        if (sc > bestScore) { bestScore = sc; bestIdx = i; }
+      }
+      if (bestIdx !== -1 && bestScore >= 20) { mapping[role.id] = bestIdx; used[bestIdx] = true; }
+    });
+    return mapping;
+  }
+
+  function numFromCell(v) {
+    var s = String(v == null ? '' : v).replace(/[^0-9.\-]/g, '');
+    var n = Number(s);
+    return isFinite(n) ? n : NaN;
+  }
+
+  function playsFromTable(table, mapping, platformId) {
+    var plays = [], skipped = 0, noTitle = 0;
+    var rows = table.rows.slice();
+    var headerLen = table.header.length;
+
+    /* Apple Music Play Activity: PLAY_START / PAUSE 등이 섞여 있어 PLAY_END만 남긴다 */
+    if (mapping.event != null) {
+      var hasEnd = rows.some(function (r) { return /play_end|playend/i.test(String(r[mapping.event] || '')); });
+      if (hasEnd) {
+        rows = rows.filter(function (r) { return /play_end|playend/i.test(String(r[mapping.event] || '')); });
+      }
+    }
+
+    rows.forEach(function (r) {
+      if (!r || (headerLen && r.length < 1)) return;
+      var title = mapping.title != null ? String(r[mapping.title] == null ? '' : r[mapping.title]).trim() : '';
+      if (!title) { noTitle++; return; }
+      var artist = mapping.artist != null ? String(r[mapping.artist] == null ? '' : r[mapping.artist]).trim() : '';
+      var when = mapping.when != null ? parseWhen(r[mapping.when], false) : null;
+      var n = 1;
+      if (mapping.count != null) {
+        var cn = numFromCell(r[mapping.count]);
+        if (isFinite(cn) && cn >= 1) n = Math.min(200, Math.round(cn));
+      }
+      var ms = mapping.ms != null ? numFromCell(r[mapping.ms]) : NaN;
+      if (isFinite(ms) && ms > 0 && ms < 30000) { skipped++; return; }
+      var pid = platformId;
+      if (mapping.platform != null) {
+        var fromCell = platformFromText(r[mapping.platform]);
+        if (fromCell && fromCell !== 'other') pid = fromCell;
+      }
+      var cleanName = cleanTitle(title);
+      if (!cleanName) { noTitle++; return; }
+      plays.push({
+        title: cleanName, artist: cleanArtist(artist),
+        t: when ? when.t : new Date(), exact: when ? when.exact : false,
+        platform: pid || 'other', n: n
+      });
+    });
+
+    return { plays: plays, skipped: skipped, noTitle: noTitle, rowsSeen: rows.length };
+  }
+
+  function parseAppleMusicCSV(text) {
+    var delim = detectDelimiter(text);
+    var rows = parseDelimitedText(text, delim);
+    if (rows.length < 2) return { plays: [], noTitles: true };
+    var header = rows[0].map(function (h) { return String(h).trim(); });
+    var mapping = guessMapping(header);
+    var res = playsFromTable({ header: header, rows: rows.slice(1) }, mapping, 'apple_music');
+    res.header = header;
+    res.mapping = mapping;
+    return res;
+  }
+
+  /* ---------- 3-E. iTunes / Apple Music Library.xml ---------- */
+  function parseAppleLibraryXML(text) {
+    var plays = [], noTime = 0;
+    if (typeof DOMParser === 'undefined') throw new Error('NO_PARSER');
+    var doc = new DOMParser().parseFromString(text, 'text/xml');
+    var failed = doc.getElementsByTagName('parsererror');
+    if (failed && failed.length) throw new Error('BAD_XML');
+    var dicts = doc.getElementsByTagName('dict');
+    for (var i = 0; i < dicts.length; i++) {
+      var kids = dicts[i].children;
+      var track = {};
+      for (var j = 0; j < kids.length; j++) {
+        if (kids[j].tagName !== 'key') continue;
+        var key = kids[j].textContent;
+        var valEl = kids[j].nextElementSibling;
+        if (!valEl) continue;
+        track[key] = valEl.textContent;
+      }
+      if (!track.Name) continue;
+      var count = Math.max(1, Math.min(200, Math.round(Number(track['Play Count']) || 0))) || 1;
+      var playedDate = track['Play Date'] ? new Date(Date.UTC(2001, 0, 1) + Number(track['Play Date']) * 1000) : null;
+      if (!playedDate || isNaN(playedDate.getTime())) { noTime++; continue; }
+      plays.push({
+        title: cleanTitle(track.Name), artist: cleanArtist(track.Artist),
+        t: playedDate, exact: false, platform: 'apple_music', n: count
+      });
+    }
+    return { plays: plays, noTime: noTime, isLibrary: true };
+  }
+
+  /* ---------- 3-F. 객체 배열(JSON)에서 표처럼 읽기 ---------- */
+  function recordsToTable(list) {
+    var keys = [], seen = {};
+    list.slice(0, 40).forEach(function (o) {
+      if (!o || typeof o !== 'object') return;
+      Object.keys(o).forEach(function (k) {
+        if (!seen[k]) { seen[k] = 1; keys.push(k); }
+      });
+    });
+    var rows = list.map(function (o) {
+      return keys.map(function (k) {
+        var v = o ? o[k] : '';
+        if (v == null) return '';
+        if (typeof v === 'object') return JSON.stringify(v);
+        return String(v);
+      });
+    });
+    return { header: keys, rows: rows };
+  }
+
+  function looksLikeYouTubeRecord(r) {
+    if (!r || typeof r !== 'object') return false;
+    return r.titleUrl !== undefined || r.header !== undefined || (Array.isArray(r.subtitles) && r.time !== undefined);
+  }
+
+  /* ---------- 3-G. 붙여넣기 목록 ---------- */
+  function parsePastedText(text, opts) {
+    var order = (opts && opts.order) === 'at' ? 'at' : 'ta';
+    var platform = (opts && opts.platform) || 'other';
+    var lines = String(text || '').split(/\r?\n/);
+    var plays = [], bad = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].replace(/^\uFEFF/, '').trim();
+      if (!line || /^[#\/\/]/.test(line)) continue;
+      /* 번호·글머리표 제거: "1. ", "- ", "• " */
+      line = line.replace(/^\d{1,3}[.)]\s+/, '').replace(/^[-•·*]\s+/, '').trim();
+
+      /* 앞에 붙은 날짜 */
+      var when = null;
+      var dm = line.match(/^(\d{4}[.\-\/]\s*\d{1,2}[.\-\/]\s*\d{1,2}(?:\s+\d{1,2}:\d{2})?)\s*[|,)}\]]\s*/);
+      if (dm) { when = parseWhen(dm[1], false); line = line.slice(dm[0].length).trim(); }
+      if (!line) continue;
+
+      /* 뒤에 붙은 횟수: "(12회)", "x3", "\t12" */
+      var n = 1;
+      var cm = line.match(/(?:[\s(\[]|\t)(\d{1,4})\s*(?:회|번|times|plays|x)?\s*[)\]]?$/i);
+      if (cm && /(?:회|번|times|plays|[x×]|\t)/i.test(line.slice(-cm[0].length))) {
+        n = Math.max(1, Math.min(200, Number(cm[1])));
+        line = line.slice(0, line.length - cm[0].length).trim();
+      } else if (/[x×]\s*\d{1,4}$/i.test(line)) {
+        var xm = line.match(/[x×]\s*(\d{1,4})$/i);
+        n = Math.max(1, Math.min(200, Number(xm[1])));
+        line = line.slice(0, line.length - xm[0].length).trim();
+      }
+
+      var parts = line.split(/\s+[–—\-|]\s+|\t+|\s{3,}/).map(function (s) { return s.trim(); }).filter(Boolean);
+      if (!parts.length) { bad++; continue; }
+      var title, artist;
+      if (parts.length === 1) {
+        title = parts[0]; artist = '';
+      } else if (order === 'at') {
+        artist = parts[0]; title = parts.slice(1).join(' - ');
+      } else {
+        title = parts[0]; artist = parts.slice(1).join(' - ');
+      }
+      var t = cleanTitle(title);
+      if (!t) { bad++; continue; }
+      plays.push({
+        title: t, artist: cleanArtist(artist),
+        t: when ? when.t : new Date(), exact: when ? when.exact : false,
+        platform: platform, n: n
+      });
+    }
+    return { plays: plays, bad: bad, lines: lines.filter(function (l) { return l.trim(); }).length };
+  }
+
+  /* ---------- 3-H. 파일 하나를 알아서 읽기 ---------- */
+  function parseFileText(fileName, text) {
+    var name = String(fileName || '').toLowerCase();
+    var trimmed = String(text).replace(/^\uFEFF/, '').trim();
+    if (!trimmed) throw new Error('EMPTY');
+
+    /* XML 보관함 */
+    if (/^<\?xml/i.test(trimmed) || /^<plist/i.test(trimmed)) {
+      var xml = parseAppleLibraryXML(trimmed);
+      xml.fileKind = 'apple_library_xml';
+      return xml;
+    }
+
+    /* JSON */
+    if (/^[\[{]/.test(trimmed)) {
+      var data;
+      try { data = JSON.parse(trimmed); } catch (e) { throw new Error('BAD_JSON'); }
+      var list = null;
+      if (Array.isArray(data)) list = data;
+      else if (data && Array.isArray(data['watch-history'])) list = data['watch-history'];
+      else if (data && Array.isArray(data.items)) list = data.items;
+      else if (data && Array.isArray(data.data)) list = data.data;
+      if (!list) throw new Error('NOT_RECORDS');
+      if (!list.length) throw new Error('NO_ROWS');
+
+      var first = list[0];
+      if (looksLikeSpotifyRecord(first) || looksLikeSpotifyRecord(list[Math.min(list.length - 1, 5)])) {
+        var sp = parseSpotify(list);
+        sp.fileKind = 'spotify_json';
+        return sp;
+      }
+      if (looksLikeYouTubeRecord(first) || looksLikeYouTubeRecord(list[Math.min(list.length - 1, 5)])) {
+        var yt = parseWatchHistory(data);
+        yt.fileKind = 'youtube_json';
+        return yt;
+      }
+      /* 그 밖의 JSON은 키를 열 이름 삼아 표로 읽고, 필요하면 열 지정 화면으로 */
+      var tbl = recordsToTable(list);
+      var guess = guessMapping(tbl.header);
+      if (guess.title == null) throw new Error('NOT_RECORDS');
+      var res = playsFromTable(tbl, guess, platformFromText(name) || 'other');
+      res.table = tbl; res.mapping = guess; res.fileKind = 'json_table';
+      res.needsMapping = !confidentMapping(tbl.header, guess, 2);
+      return res;
+    }
+
+    /* 표 (CSV·TSV·TXT) */
+    var delim = detectDelimiter(trimmed);
+    var rows = parseDelimitedText(trimmed, delim);
+    if (!rows.length) throw new Error('NO_ROWS');
+    var header = rows[0].map(function (h) { return String(h).trim(); });
+    var body = rows.slice(1);
+    var looksTiled = header.length > 1 && body.length > 0;
+
+    if (!looksTiled) {
+      /* 한 열짜리 목록이면 붙여넣기 파서로 */
+      var pasted = parsePastedText(trimmed, { order: 'ta', platform: platformFromText(name) || 'other' });
+      pasted.fileKind = 'list_txt';
+      return pasted;
+    }
+
+    var mapping = guessMapping(header);
+    var platformHint = platformFromText(name) || (/apple/i.test(name) ? 'apple_music' : 'other');
+    var out = playsFromTable({ header: header, rows: body }, mapping, platformHint);
+    out.table = { header: header, rows: body };
+    out.mapping = mapping;
+    out.fileKind = 'csv';
+    out.needsMapping = !confidentMapping(header, mapping, 3);
+    return out;
+  }
+
+  /* 자동 인식이 충분히 확실한가 (곡명·아티스트가 둘 다 있고 점수가 높은가) */
+  function confidentMapping(header, mapping, minRows) {
+    if (mapping.title == null) return false;
+    if (mapping.artist == null) return false;
+    var ts = scoreHeader(header[mapping.title], COL_ROLES[3].keys);
+    var as = scoreHeader(header[mapping.artist], COL_ROLES[2].keys);
+    return ts >= 60 && as >= 60;
+  }
+
+  /* 재생 목록 → 집계 데이터 (플랫폼·가중치·시각 정확도 포함) */
+  function aggregate(plays, source, sample, meta) {
     var byHour = new Array(24).fill(0);
     var tracks = {};
     var artists = {};
     var days = {};
+    var platforms = {};
     var first = null;
     var last = null;
+    var exactPlays = 0;
+    var roughPlays = 0;
+    var totalWeight = 0;
 
     for (var i = 0; i < plays.length; i++) {
       var p = plays[i];
-      var h = p.t.getHours();
-      byHour[h] += 1;
+      if (!p || !p.t || isNaN(p.t.getTime())) continue;
+      var w = Number(p.n) > 0 ? Number(p.n) : 1;
+      totalWeight += w;
+
+      if (p.exact !== false) { byHour[p.t.getHours()] += w; exactPlays += w; }
+      else roughPlays += w;
+
+      var pid = p.platform && PLATFORM_BY_ID[p.platform] ? p.platform : 'other';
+      platforms[pid] = (platforms[pid] || 0) + w;
 
       var key = (p.title || '').toLowerCase() + '\u0000' + (p.artist || '').toLowerCase();
       var tk = tracks[key];
       if (!tk) {
-        tk = { title: p.title, artist: p.artist || '', count: 0, last: p.t.getTime(), days: {} };
+        tk = { title: p.title, artist: p.artist || '', count: 0, last: p.t.getTime(), platforms: {}, hours: new Array(24).fill(0) };
         tracks[key] = tk;
       }
-      tk.count += 1;
+      tk.count += w;
+      tk.platforms[pid] = (tk.platforms[pid] || 0) + w;
+      if (p.exact !== false) tk.hours[p.t.getHours()] += w;
       if (p.t.getTime() > tk.last) tk.last = p.t.getTime();
 
       if (p.artist) {
         var ak = p.artist.toLowerCase();
-        if (!artists[ak]) artists[ak] = { name: p.artist, count: 0, tracks: {} };
-        artists[ak].count += 1;
+        if (!artists[ak]) artists[ak] = { name: p.artist, count: 0, tracks: {}, platforms: {} };
+        artists[ak].count += w;
         artists[ak].tracks[key] = 1;
+        artists[ak].platforms[pid] = (artists[ak].platforms[pid] || 0) + w;
       }
 
       var dkey = ymd(p.t);
-      days[dkey] = (days[dkey] || 0) + 1;
+      days[dkey] = (days[dkey] || 0) + w;
 
       var ts = p.t.getTime();
       if (first === null || ts < first) first = ts;
@@ -1398,7 +2074,9 @@
         title: tracks[k].title,
         artist: tracks[k].artist,
         count: tracks[k].count,
-        last: new Date(tracks[k].last).toISOString()
+        last: new Date(tracks[k].last).toISOString(),
+        platforms: tracks[k].platforms,
+        hours: tracks[k].hours
       };
     }).sort(function (a, b) {
       if (b.count !== a.count) return b.count - a.count;
@@ -1409,7 +2087,8 @@
       return {
         name: artists[k].name,
         count: artists[k].count,
-        tracks: Object.keys(artists[k].tracks).length
+        tracks: Object.keys(artists[k].tracks).length,
+        platforms: artists[k].platforms
       };
     }).sort(function (a, b) {
       if (b.count !== a.count) return b.count - a.count;
@@ -1417,26 +2096,119 @@
     });
 
     var topHour = 0;
-    for (var hh = 1; hh < 24; hh++) {
-      if (byHour[hh] > byHour[topHour]) topHour = hh;
+    if (!exactPlays) {
+      /* 시각 정보가 없는 파일은 시간대 차트를 비워 둔다 */
+      for (var z = 0; z < 24; z++) byHour[z] = 0;
+    } else {
+      for (var hh = 1; hh < 24; hh++) {
+        if (byHour[hh] > byHour[topHour]) topHour = hh;
+      }
     }
 
     return {
-      version: 1,
+      version: 2,
       source: source || 'takeout',
       sample: !!sample,
       createdAt: new Date().toISOString(),
-      plays: plays.length,
+      plays: Math.round(totalWeight),
       uniqueTracks: trackArr.length,
       uniqueArtists: artistArr.length,
       hours: byHour,
       topHour: topHour,
       days: Object.keys(days).length,
+      dayMap: days,
+      platforms: platforms,
+      exactPlays: Math.round(exactPlays),
+      roughPlays: Math.round(roughPlays),
       first: first ? new Date(first).toISOString() : null,
       last: last ? new Date(last).toISOString() : null,
       tracks: trackArr.slice(0, 5000),
-      artists: artistArr.slice(0, 500)
+      artists: artistArr.slice(0, 500),
+      sources: (meta && meta.sources) || [],
+      notes: (meta && meta.notes) || [],
+      fileName: (meta && meta.fileName) || ''
     };
+  }
+
+  /* 플랫폼별 파일을 합칠 때: 원본 재생을 다시 계산하지 않고 집계를 합산 */
+  function mergeDatasets(base, add) {
+    if (!base) return add;
+    var out = JSON.parse(JSON.stringify(base));
+    out.version = 2;
+    out.sample = false;
+    out.plays = (base.plays || 0) + (add.plays || 0);
+
+    var hours = new Array(24).fill(0);
+    for (var h = 0; h < 24; h++) hours[h] = (base.hours[h] || 0) + (add.hours[h] || 0);
+    out.hours = hours;
+    out.topHour = 0;
+    for (var hh = 1; hh < 24; hh++) if (hours[hh] > hours[out.topHour]) out.topHour = hh;
+
+    var plats = {};
+    [base.platforms || {}, add.platforms || {}].forEach(function (m) {
+      Object.keys(m).forEach(function (k) { plats[k] = (plats[k] || 0) + m[k]; });
+    });
+    out.platforms = plats;
+
+    out.exactPlays = (base.exactPlays || 0) + (add.exactPlays || 0);
+    out.roughPlays = (base.roughPlays || 0) + (add.roughPlays || 0);
+
+    var dayMap = {};
+    [base.dayMap || {}, add.dayMap || {}].forEach(function (m) {
+      Object.keys(m).forEach(function (k) { dayMap[k] = (dayMap[k] || 0) + m[k]; });
+    });
+    out.dayMap = dayMap;
+    out.days = Object.keys(dayMap).length;
+
+    if (base.first && add.first) out.first = base.first < add.first ? base.first : add.first;
+    else out.first = base.first || add.first;
+    if (base.last && add.last) out.last = base.last > add.last ? base.last : add.last;
+    else out.last = base.last || add.last;
+
+    function mergeList(a, b, nameKey) {
+      var idx = {}, arr = [];
+      (a || []).forEach(function (x) {
+        var k = String(x[nameKey]).toLowerCase() + '\u0000' + String(x.artist || '').toLowerCase();
+        idx[k] = x;
+        arr.push(x);
+      });
+      (b || []).forEach(function (x) {
+        var k = String(x[nameKey]).toLowerCase() + '\u0000' + String(x.artist || '').toLowerCase();
+        var t = idx[k];
+        if (!t) {
+          var copy = JSON.parse(JSON.stringify(x));
+          idx[k] = copy;
+          arr.push(copy);
+          return;
+        }
+        t.count += x.count || 0;
+        if (x.last && (!t.last || x.last > t.last)) t.last = x.last;
+        t.platforms = t.platforms || {};
+        Object.keys(x.platforms || {}).forEach(function (p) {
+          t.platforms[p] = (t.platforms[p] || 0) + x.platforms[p];
+        });
+        if (x.hours && x.hours.length) {
+          t.hours = t.hours || new Array(24).fill(0);
+          for (var i = 0; i < 24; i++) t.hours[i] += Number(x.hours[i]) || 0;
+        }
+        if (x.tracks && t.tracks != null) t.tracks = Math.max(t.tracks, x.tracks);
+      });
+      return arr;
+    }
+
+    out.tracks = mergeList(base.tracks, add.tracks, 'title').sort(function (a, b) {
+      return b.count - a.count;
+    }).slice(0, 5000);
+    out.uniqueTracks = out.tracks.length;
+    out.artists = mergeList(base.artists, add.artists, 'name').sort(function (a, b) {
+      return b.count - a.count;
+    }).slice(0, 500);
+    out.uniqueArtists = out.artists.length;
+
+    out.sources = (base.sources || []).concat(add.sources || []);
+    out.notes = (base.notes || []).concat(add.notes || []);
+    out.fileName = [base.fileName, add.fileName].filter(Boolean).join(' + ');
+    return out;
   }
 
   /* ============================================================
@@ -1467,6 +2239,10 @@
     ['여름 우체국', '소금'], ['Late Coffee', '소금'], ['종이 달', '하루'], ['긴 오후', '하루']
   ];
 
+  /* 샘플도 여러 플랫폼이 섞여 있다 — 곡마다 주로 듣던 플랫폼을 붙인다 */
+  var SAMPLE_PLATFORM_ORDER = ['youtube_music', 'spotify', 'apple_music', 'melon', 'genie', 'flo', 'bugs', 'vibe'];
+  function samplePlatformAt(i) { return SAMPLE_PLATFORM_ORDER[i % SAMPLE_PLATFORM_ORDER.length]; }
+
   function buildSamplePlays() {
     var rnd = mulberry32(20261117);
     // 저녁·밤에 몰리고, 새벽에 한 번 더 솟는 패턴
@@ -1485,10 +2261,10 @@
       }
       return 22;
     }
-    function pickTrack() {
+    function pickTrackIndex() {
       // 반복 청취가 두드러지되, 한 곡이 독점하지 않도록 완만한 편향
       var idx = Math.floor(Math.pow(rnd(), 1.55) * SAMPLE_LIBRARY.length);
-      return SAMPLE_LIBRARY[Math.min(idx, SAMPLE_LIBRARY.length - 1)];
+      return Math.min(idx, SAMPLE_LIBRARY.length - 1);
     }
 
     for (var i = 0; i < total; i++) {
@@ -1496,8 +2272,9 @@
       var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysAgo);
       d.setHours(pickHour(), Math.floor(rnd() * 60), Math.floor(rnd() * 60), 0);
       if (d.getTime() > now.getTime()) d = new Date(now.getTime() - 3600 * 1000);
-      var tr = pickTrack();
-      plays.push({ title: tr[0], artist: tr[1], t: d });
+      var ti = pickTrackIndex();
+      var tr = SAMPLE_LIBRARY[ti];
+      plays.push({ title: tr[0], artist: tr[1], t: d, exact: true, platform: samplePlatformAt(ti) });
     }
     plays.sort(function (a, b) { return a.t - b.t; });
 
@@ -1505,9 +2282,27 @@
     SAMPLE_LIBRARY.forEach(function (tr, idx) {
       if (!plays.some(function (p) { return p.title === tr[0]; })) {
         var d2 = new Date(now.getTime() - (idx % 30 + 2) * 86400000 - idx * 3600000);
-        plays.push({ title: tr[0], artist: tr[1], t: d2 });
+        plays.push({ title: tr[0], artist: tr[1], t: d2, exact: true, platform: samplePlatformAt(idx) });
       }
     });
+    plays.sort(function (a, b) { return a.t - b.t; });
+    return plays;
+  }
+
+  /* 플랫폼 하나만 골라 둘러보는 샘플 */
+  function buildPlatformSamplePlays(platformId) {
+    var rnd = mulberry32(4200 + platformId.length * 7);
+    var lib = SAMPLE_LIBRARY.slice(0, 14);
+    var now = new Date();
+    var plays = [];
+    for (var i = 0; i < 68; i++) {
+      var tr = lib[Math.floor(Math.pow(rnd(), 1.3) * lib.length)];
+      var daysAgo = Math.floor(rnd() * 45);
+      var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysAgo,
+        6 + Math.floor(rnd() * 17), Math.floor(rnd() * 60), 0);
+      if (d.getTime() > now.getTime()) d = new Date(now.getTime() - 1800000);
+      plays.push({ title: tr[0], artist: tr[1], t: d, exact: true, platform: platformId });
+    }
     plays.sort(function (a, b) { return a.t - b.t; });
     return plays;
   }
@@ -1542,7 +2337,7 @@
     var ds = state.dataset;
     var bits = [];
     if (ds) {
-      bits.push('<span class="pill"><span class="dot"></span>' + (ds.sample ? '샘플 데이터' : '내 시청 기록') + ' · ' + num(ds.plays) + '회 재생</span>');
+      bits.push('<span class="pill"><span class="dot"></span>' + (ds.sample ? '샘플 데이터' : (state.fromSeed ? '기본 공개 기록' : '내 기록')) + ' · ' + num(ds.plays) + '회 재생</span>');
       if (ds.first && ds.last) {
         bits.push('<span class="pill">' + esc(dotDate(new Date(ds.first))) + ' – ' + esc(dotDate(new Date(ds.last))) + '</span>');
       }
@@ -1553,26 +2348,124 @@
     $('#heroMeta').innerHTML = bits.join('');
   }
 
+  /* ---------- 불러오기 화면 ---------- */
+  function platformCardHTML(p) {
+    return '<div class="pcard" data-platform="' + p.id + '">' +
+      '<span class="pn"><i class="pdot" style="background:' + p.color + '"></i>' + esc(p.label) + '</span>' +
+      '<span class="pd">' + esc(p.files) + '</span>' +
+      '<span class="pacts">' +
+        '<button class="btn small" type="button" data-sample-platform="' + p.id + '">샘플</button>' +
+        '<button class="btn ghost small" type="button" data-guide-platform="' + p.id + '">가이드</button>' +
+      '</span>' +
+      '<ol class="psteps" data-guide-for="' + p.id + '" hidden>' +
+        p.steps.map(function (s) { return '<li>' + s + '</li>'; }).join('') +
+      '</ol>' +
+    '</div>';
+  }
+
+  function platformSelectHTML(id, selected) {
+    return '<select id="' + id + '">' + PLATFORMS.map(function (p) {
+      return '<option value="' + p.id + '"' + (p.id === selected ? ' selected' : '') + '>' + esc(p.label) + '</option>';
+    }).join('') + '</select>';
+  }
+
+  function pastePanelHTML() {
+    return '<div id="pastePanel" hidden style="margin-top:14px">' +
+      '<div class="notebox">공식 파일이 없는 플랫폼은 목록을 그대로 복사해 넣으면 돼요. ' +
+        '한 줄에 한 곡씩 — <code>곡명 - 아티스트</code> 또는 <code>아티스트 - 곡명</code>. ' +
+        '앞에 <code>2024-05-01</code> 같은 날짜를, 뒤에 <code>(12회)</code> 같은 횟수를 붙여도 읽습니다. ' +
+        '줄 번호·글머리표(<code>1.</code>, <code>-</code>)는 알아서 뗍니다.</div>' +
+      '<div class="field pastebox" style="margin-top:12px">' +
+        '<label for="pasteArea">목록</label>' +
+        '<textarea id="pasteArea" placeholder="새벽의 온도 - 서하&#10;Night Bus - 문라이트 클럽&#10;2024-05-01 오후 9:12 · 우리는 여름에 - 파도 소리 - (7회)"></textarea>' +
+      '</div>' +
+      '<div class="grid-2">' +
+        '<div class="field">' +
+          '<label>줄 순서</label>' +
+          '<div class="seg" id="pasteOrder">' +
+            '<button type="button" data-order="ta" aria-pressed="true">곡명 - 아티스트</button>' +
+            '<button type="button" data-order="at" aria-pressed="false">아티스트 - 곡명</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="field">' +
+          '<label for="pastePlatform">어디서 들었나요</label>' +
+          platformSelectHTML('pastePlatform', state.pastePlatform) +
+        '</div>' +
+      '</div>' +
+      '<div class="data-row" style="margin-top:4px">' +
+        '<button class="btn primary small" type="button" id="pasteRun">이 목록으로 분석하기</button>' +
+        '<button class="btn small" type="button" id="pasteFill">예시 채우기</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function intakeEmptyHTML() {
+    return '<div class="big-ico" aria-hidden="true">♫</div>' +
+      '<h2>음악 기록을 올려 주세요</h2>' +
+      '<p>YouTube Music · Spotify · Apple Music · 멜론 · 지니 · FLO — <b>어디서 들었든</b> 한곳에 모아 봐요. 여러 플랫폼 파일을 한 번에 올리면 합쳐서 보여 줍니다.</p>' +
+      '<div class="btn-row">' +
+        '<button class="btn primary" type="button" id="pickFileBtn">파일 올리기 (JSON · CSV · TXT)</button>' +
+        '<button class="btn" type="button" id="pasteOpenBtn">목록 붙여넣기</button>' +
+        '<button class="btn" type="button" id="sampleBtn">샘플로 둘러보기</button>' +
+      '</div>' +
+      '<p class="hint">올린 파일은 브라우저 안에서만 읽고 어디에도 전송하지 않아요. 형식은 파일 이름과 내용을 보고 자동으로 알아냅니다.</p>' +
+      '<div class="section-label" style="margin:18px 4px 0">플랫폼별 체험 · 가이드</div>' +
+      '<div class="pgrid">' + PLATFORMS.map(platformCardHTML).join('') + '</div>' +
+      pastePanelHTML() +
+      '<details class="howto"><summary>내 기록 가져오는 법 (플랫폼별 단계)</summary>' +
+        PLATFORMS.map(function (p) {
+          return '<div style="margin:10px 0"><b><i class="pdot" style="background:' + p.color + ';margin-right:5px"></i>' + esc(p.label) + '</b>' +
+            '<ol style="margin:4px 0 0;padding-left:18px;font-size:11.5px;line-height:1.75">' +
+            p.steps.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ol></div>';
+        }).join('') +
+        '<p class="hint" style="margin:10px 0 0;text-align:left">말로만 확인하지 말고 예시 파일로 먼저 해보세요 — ' +
+          '<a href="samples/youtube-music-watch-history.json" download>YouTube</a> · ' +
+          '<a href="samples/spotify-streaming-history-music.json" download>Spotify</a> · ' +
+          '<a href="samples/apple-music-play-activity.csv" download>Apple</a> · ' +
+          '<a href="samples/melon-recent-tracks.csv" download>멜론 CSV</a> · ' +
+          '<a href="samples/melon-recent-tracks.txt" download>멜론 목록</a></p>' +
+      '</details>';
+  }
+
+  function mappingPanelHTML(q) {
+    var t = q.table;
+    var cols = t.header;
+    var rows = t.rows.slice(0, 3);
+    var prev = '<div class="mapprev"><table><thead><tr>' +
+      cols.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      rows.map(function (r) {
+        return '<tr>' + cols.map(function (c, i) {
+          return '<td>' + esc(String(r[i] == null ? '' : r[i]).slice(0, 40)) + '</td>';
+        }).join('') + '</tr>';
+      }).join('') + '</tbody></table></div>';
+    var selects = COL_ROLES.map(function (role) {
+      var cur = q.mapping ? q.mapping[role.id] : null;
+      return '<div class="field" style="margin-bottom:4px">' +
+        '<label for="map-' + role.id + '">' + role.label + '</label>' +
+        '<select id="map-' + role.id + '" data-role="' + role.id + '">' +
+          '<option value="">— 없음 —</option>' +
+          cols.map(function (c, i) {
+            return '<option value="' + i + '"' + (cur === i ? ' selected' : '') + '>' + esc(c || ('열 ' + (i + 1))) + '</option>';
+          }).join('') +
+        '</select></div>';
+    }).join('');
+    return '<div class="notebox" style="margin-top:14px;border-color:var(--accent)">' +
+      '<b>열 지정이 필요해요</b> — <b>' + esc(q.fileName) + '</b>의 어느 열이 곡명·아티스트·날짜인지 확인해 주세요. 자동으로 맞춘 값이 먼저 들어가 있어요.' +
+      prev +
+      '<div class="mapgrid">' + selects + '</div>' +
+      '<div class="data-row" style="margin-top:10px">' +
+        '<button class="btn small primary" type="button" id="mapRun">이 설정으로 분석하기</button>' +
+        '<button class="btn small" type="button" id="mapSkip">이 파일 건너뛰기</button>' +
+      '</div></div>';
+  }
+
   function renderIntake() {
     var box = $('#intake');
     var ds = state.dataset;
+    var map = state.mapping ? mappingPanelHTML(state.mapping) : '';
     if (!ds) {
       box.className = 'card intake';
-      box.innerHTML =
-        '<div class="big-ico" aria-hidden="true">♫</div>' +
-        '<h2>시청 기록을 올려 주세요</h2>' +
-        '<p>구글 테이크아웃에서 받은 <b>watch-history.json</b>을 그대로 넣으면, YouTube Music 기록만 골라 분석해요.</p>' +
-        '<div class="btn-row">' +
-          '<button class="btn primary" type="button" id="pickFileBtn">내 watch-history.json 올리기</button>' +
-          '<button class="btn" type="button" id="sampleBtn">샘플로 둘러보기</button>' +
-        '</div>' +
-        '<p class="hint">기록이 없어도 괜찮아요 — 샘플로 먼저 둘러보고, 감정 기록은 지금부터 쌓아도 됩니다.</p>' +
-        '<details class="howto"><summary>기록 파일은 어떻게 받나요?</summary><ol>' +
-          '<li><a href="https://takeout.google.com" target="_blank" rel="noopener">takeout.google.com</a> → <b>모두 선택 해제</b> 후 <b>YouTube 및 YouTube Music</b>만 선택</li>' +
-          '<li><b>여러 형식</b> → <code>history</code> 항목을 <b>JSON</b>으로 변경 (기본값은 HTML이에요)</li>' +
-          '<li>내보내기 → 도착한 ZIP 압축 해제 → <code>Takeout/YouTube and YouTube Music/history/watch-history.json</code></li>' +
-          '<li>그 파일을 여기에 올리면 끝! (파일은 브라우저 안에서만 처리되고 어디에도 전송되지 않아요)</li>' +
-        '</ol><p class="hint" style="margin:8px 0 0;text-align:left">아이폰은 <b>파일</b> 앱에서 내려받은 ZIP을 탭하면 압축이 풀려요.</p></details>';
+      box.innerHTML = intakeEmptyHTML() + map;
       bindIntake();
       return;
     }
@@ -1580,24 +2473,42 @@
     var range = (ds.first && ds.last)
       ? dotDate(new Date(ds.first)) + ' – ' + dotDate(new Date(ds.last))
       : '기간 정보 없음';
-    var ignoreLine = ds.ignored
-      ? '<div class="file-sub" style="opacity:.75">일반 YouTube 영상 ' + num(ds.ignored) + '개는 제외했어요</div>'
+    var notes = (ds.notes || []).slice();
+    var plats = ds.platforms || {};
+    var platIds = Object.keys(plats).sort(function (a, b) { return plats[b] - plats[a]; });
+    var platChips = platIds.map(function (id) {
+      return platformChip(id) + '<span style="font-size:10.5px;color:var(--muted)">' + num(plats[id]) + '회</span>';
+    }).join(' ');
+    var srcLine = (ds.sources && ds.sources.length > 1)
+      ? '<div class="srcrow">' + ds.sources.map(function (s) {
+          return '<span class="pchip"><i class="pdot" style="background:' + platformColor(s.platform) + '"></i>' + esc(s.fileName || platformLabel(s.platform)) + '</span>';
+        }).join('') + '</div>'
       : '';
+
     box.className = 'card intake loaded';
     box.innerHTML =
-      '<div class="file-meta"><div class="file-name">' + (ds.sample ? '샘플 데이터' : esc(ds.fileName || 'watch-history.json')) + '</div>' +
+      (state.fromSeed ? '<div class="notebox" style="margin-bottom:12px">이 사이트에는 <b>주인이 공개한 YouTube Music 기록</b>이 기본으로 실려 있어요(음악만, 12,307회·2,925곡). 내 기록을 올리면 이 기본 기록 대신 내 기록으로 바뀝니다.</div>' : '') +
+      '<div class="file-meta"><div class="file-name">' + (ds.sample ? '샘플 데이터' : esc(ds.fileName || '내 기록')) + '</div>' +
       '<div class="file-sub">' + num(ds.plays) + '회 재생 · ' + num(ds.uniqueTracks) + '곡 · ' + esc(range) + '</div>' +
-      ignoreLine + '</div>' +
+      (platChips ? '<div class="pchips">' + platChips + '</div>' : '') +
+      srcLine +
+      (notes.length ? '<div class="file-sub" style="opacity:.75">' + esc(notes.join(' · ')) + '</div>' : '') +
+      (ds.exactPlays === 0 && ds.plays ? '<div class="file-sub" style="opacity:.75">재생 시각이 없는 파일이라 시간대 차트는 비어 있어요</div>' : '') +
+      '</div>' +
       '<div class="btn-row" style="justify-content:flex-end">' +
         (ds.sample ? '<button class="btn small" type="button" id="clearSampleBtn">샘플 지우기</button>' : '') +
-        '<button class="btn small" type="button" id="pickFileBtn">다른 파일 올리기</button>' +
-      '</div>';
+        (state.fromSeed ? '<button class="btn small" type="button" id="clearSeedBtn">기본 기록 지우기</button>' : '') +
+        '<button class="btn small" type="button" id="mergeFileBtn">다른 플랫폼 기록 더하기</button>' +
+        '<button class="btn small" type="button" id="pickFileBtn">새로 올리기</button>' +
+      '</div>' + map;
     bindIntake();
   }
 
   function bindIntake() {
     var pick = $('#pickFileBtn');
-    if (pick) pick.addEventListener('click', function () { $('#fileInput').click(); });
+    if (pick) pick.addEventListener('click', function () { state.mergeMode = false; $('#fileInput').click(); });
+    var merge = $('#mergeFileBtn');
+    if (merge) merge.addEventListener('click', function () { state.mergeMode = true; $('#fileInput').click(); });
     var sample = $('#sampleBtn');
     if (sample) sample.addEventListener('click', loadSample);
     var clear = $('#clearSampleBtn');
@@ -1606,6 +2517,83 @@
       try { localStorage.removeItem(KEY_DATASET); } catch (e) {}
       renderAll();
       toast('샘플 데이터를 지웠어요');
+    });
+    var clearSeed = $('#clearSeedBtn');
+    if (clearSeed) clearSeed.addEventListener('click', function () {
+      if (!window.confirm('사이트에 기본으로 실린 기록을 지울까요?\n(이 브라우저에서만 지워지고, 내 기록을 올리면 바로 쓸 수 있어요.)')) return;
+      state.dataset = null;
+      state.entries = [];
+      state.fromSeed = false;
+      try { localStorage.removeItem(KEY_DATASET); localStorage.removeItem(KEY_ENTRIES); } catch (e) {}
+      renderAll();
+      toast('기본 기록을 지웠어요 — 내 파일을 올려 주세요');
+    });
+
+    /* 플랫폼 카드 */
+    $$('#intake [data-sample-platform]').forEach(function (btn) {
+      btn.addEventListener('click', function () { loadPlatformSample(btn.getAttribute('data-sample-platform')); });
+    });
+    $$('#intake [data-guide-platform]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-guide-platform');
+        var ol = document.querySelector('#intake [data-guide-for="' + id + '"]');
+        if (ol) ol.hidden = !ol.hidden;
+      });
+    });
+
+    /* 붙여넣기 */
+    var openPaste = $('#pasteOpenBtn');
+    if (openPaste) openPaste.addEventListener('click', function () {
+      var panel = $('#pastePanel');
+      if (!panel) return;
+      panel.hidden = false;
+      var area = $('#pasteArea');
+      if (area) area.focus();
+    });
+    $$('#pasteOrder button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        state.pasteOrder = b.getAttribute('data-order');
+        $$('#pasteOrder button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      });
+    });
+    var pasteSel = $('#pastePlatform');
+    if (pasteSel) pasteSel.addEventListener('change', function () { state.pastePlatform = pasteSel.value; });
+    var pasteFill = $('#pasteFill');
+    if (pasteFill) pasteFill.addEventListener('click', function () {
+      var area = $('#pasteArea');
+      if (!area) return;
+      area.value = [
+        '새벽의 온도 - 서하',
+        'Night Bus - 문라이트 클럽',
+        '2024-05-01 오후 9:12 · 우리는 여름에 - 파도 소리 - (7회)',
+        '1. Blue Hour - 서하',
+        '종이비행기 - 이도윤 (3회)',
+        'Daisy - 코튼 캔디'
+      ].join('\n');
+    });
+    var pasteRun = $('#pasteRun');
+    if (pasteRun) pasteRun.addEventListener('click', runPaste);
+
+    /* 열 지정 */
+    var mapRun = $('#mapRun');
+    if (mapRun) mapRun.addEventListener('click', function () {
+      var q = state.mapping;
+      if (!q) return;
+      var mapping = {};
+      $$('#intake select[data-role]').forEach(function (sel) {
+        if (sel.value !== '') mapping[sel.getAttribute('data-role')] = Number(sel.value);
+      });
+      if (mapping.title == null) { toast('곡명 열을 골라 주세요'); return; }
+      var res = playsFromTable(q.table, mapping, q.platform || 'other');
+      state.mapping = null;
+      absorb(q.fileName, res);
+      processQueue();
+    });
+    var mapSkip = $('#mapSkip');
+    if (mapSkip) mapSkip.addEventListener('click', function () {
+      state.mapping = null;
+      toast('이 파일은 건너뛰었어요');
+      processQueue();
     });
   }
 
@@ -1678,12 +2666,14 @@
     var max = top[0].count;
     $('#topTracks').innerHTML = top.map(function (t, i) {
       var last = t.last ? dotDate(new Date(t.last)) : '';
+      var plat = topPlatformKey(t.platforms);
+      var tail = [last ? '마지막 ' + last : '', plat ? platformShort(plat) : ''].filter(Boolean).join(' · ');
       return '<button class="trow" type="button" data-title="' + esc(t.title) + '" data-artist="' + esc(t.artist) + '">' +
         '<span class="trank">' + (i + 1) + '</span>' +
         '<span class="tmeta"><span class="ttitle">' + esc(t.title) + '</span>' +
         '<span class="tartist">' + esc(t.artist || '아티스트 미상') + '</span></span>' +
         '<span class="tright"><span class="tcount">' + num(t.count) + '회</span>' +
-        '<span class="tlast">' + (last ? '마지막 ' + last : '') + '</span></span>' +
+        '<span class="tlast">' + esc(tail) + '</span></span>' +
         '</button>';
     }).join('');
     $('#tracksFoot').textContent = '1위 ' + top[0].title + ' · ' + num(top[0].count) + '회 (2위의 ' +
@@ -1729,22 +2719,38 @@
   function normalizeEntry(e, opts) {
     var moods = Array.isArray(e.moods) ? e.moods.filter(function (m) { return !!MOOD_BY_ID[m]; }) : [];
     if (!moods.length && MOOD_BY_ID[e.mood]) moods = [e.mood];
+    var submoods = Array.isArray(e.submoods) ? e.submoods.filter(function (s) { return !!SUBMOOD_BY_ID[s]; }) : [];
+    /* 세부 감정을 골랐으면 기본 감정도 자동으로 채운다 */
+    submoods.forEach(function (id) {
+      var parent = SUBMOOD_BY_ID[id].parent;
+      if (parent && moods.indexOf(parent) === -1) moods.push(parent);
+    });
     var contexts = Array.isArray(e.contexts) ? e.contexts.filter(function (c) { return !!CONTEXT_BY_ID[c]; }) : [];
     var slot = 'evening';
     if (e.slot && SLOT_BY_ID[e.slot]) slot = e.slot;
     else if (e.createdAt && !isNaN(new Date(e.createdAt).getTime())) slot = slotForHour(new Date(e.createdAt).getHours());
     var participant = (opts && opts.participant) ? opts.participant : (typeof e.participant === 'string' ? e.participant : state.profile.code);
+    var peakHour = null;
+    if (e.peakHour != null && isFinite(Number(e.peakHour))) peakHour = Math.min(23, Math.max(0, Math.round(Number(e.peakHour))));
     return {
       id: e.id || uid('e'),
       date: typeof e.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e.date) ? e.date : todayYMD(),
       slot: slot,
       song: typeof e.song === 'string' ? e.song.trim().slice(0, 80) : '',
       artist: typeof e.artist === 'string' ? e.artist.trim().slice(0, 60) : '',
+      platform: PLATFORM_BY_ID[e.platform] ? e.platform : '',
       moods: moods.length ? moods : ['calm'],
+      submoods: submoods,
       intensity: Math.min(5, Math.max(1, Number(e.intensity) || 3)),
-      confidence: CONF_BY_ID[e.confidence] ? e.confidence : 'mid',
+      confidence: CONF_BY_ID[e.confidence] ? e.confidence : (e.auto ? 'low' : 'mid'),
       contexts: contexts,
       memo: typeof e.memo === 'string' ? e.memo.trim().slice(0, 90) : '',
+      plays: Math.max(0, Number(e.plays) || 0),
+      peakHour: peakHour,
+      timeBand: BAND_BY_ID[e.timeBand] ? e.timeBand : (peakHour != null ? bandForHour(peakHour) : ''),
+      auto: !!e.auto,
+      autoRule: typeof e.autoRule === 'string' ? e.autoRule.slice(0, 160) : '',
+      status: e.status === 'confirmed' ? 'confirmed' : (e.status === 'unconfirmed' ? 'unconfirmed' : (e.auto ? 'unconfirmed' : 'manual')),
       participant: participant || '',
       createdAt: e.createdAt && !isNaN(new Date(e.createdAt).getTime()) ? new Date(e.createdAt).toISOString() : new Date().toISOString(),
       sample: !!e.sample
@@ -1869,14 +2875,89 @@
         if (at === -1) state.selectedMoods.push(id);
         else state.selectedMoods.splice(at, 1);
         chip.setAttribute('aria-pressed', at === -1 ? 'true' : 'false');
+        /* 기본 감정을 꽂으면 그에 속한 세부 감정도 같이 표시를 맞춘다 */
+        if (at !== -1) {
+          state.selectedSubmoods = state.selectedSubmoods.filter(function (sid) {
+            return SUBMOOD_BY_ID[sid] && SUBMOOD_BY_ID[sid].parent !== id;
+          });
+          syncSubChips();
+        }
         updateMoodHint();
       });
     });
+    renderSubChips();
     updateMoodHint();
     updateIntensity();
     renderContextChips();
     renderConfSeg();
     renderSlotSelect();
+    renderPlatformSelect();
+  }
+
+  function renderPlatformSelect() {
+    var sel = $('#fPlatform');
+    if (!sel) return;
+    var keep = sel.value;
+    var plats = (state.dataset && state.dataset.platforms) ? Object.keys(state.dataset.platforms) : [];
+    var single = plats.length === 1 ? plats[0] : '';
+    sel.innerHTML = '<option value="">— 선택 안 함 —</option>' + PLATFORMS.map(function (p) {
+      return '<option value="' + p.id + '">' + esc(p.label) + '</option>';
+    }).join('');
+    sel.value = keep || single || '';
+  }
+
+  /* 세부 감정 칩 — 4계열로 묶어서 */
+  function renderSubChips() {
+    var box = $('#subChips');
+    if (!box) return;
+    box.innerHTML = SUB_FAMILIES.map(function (f) {
+      var list = SUBMOODS.filter(function (s) { return s.family === f.id; });
+      return '<div class="quadgrp">' +
+        '<div class="quadgrp-head"><span class="qn">' + f.label + '</span>' +
+        '<span class="qd">' + f.hint + '</span></div>' +
+        '<div class="chips">' + list.map(function (s) {
+          return '<button type="button" class="chip" data-sub="' + s.id + '" aria-pressed="' +
+            (state.selectedSubmoods.indexOf(s.id) !== -1 ? 'true' : 'false') + '" title="' + esc(s.desc) + '">' +
+            '<span class="em" aria-hidden="true">' + (MOOD_BY_ID[s.parent] ? MOOD_BY_ID[s.parent].emoji : '·') + '</span>' + esc(s.label) + '</button>';
+        }).join('') + '</div></div>';
+    }).join('');
+    $$('#subChips .chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var id = chip.getAttribute('data-sub');
+        var at = state.selectedSubmoods.indexOf(id);
+        if (at === -1) state.selectedSubmoods.push(id);
+        else state.selectedSubmoods.splice(at, 1);
+        chip.setAttribute('aria-pressed', at === -1 ? 'true' : 'false');
+        var s = SUBMOOD_BY_ID[id];
+        if (s) {
+          var pi = state.selectedMoods.indexOf(s.parent);
+          if (at === -1 && pi === -1) state.selectedMoods.push(s.parent);
+          if (at !== -1 && pi !== -1) {
+            var stillUsed = state.selectedSubmoods.some(function (sid) { return SUBMOOD_BY_ID[sid].parent === s.parent; });
+            if (!stillUsed) state.selectedMoods.splice(pi, 1);
+          }
+        }
+        syncSubChips();
+        updateMoodHint();
+      });
+    });
+  }
+
+  function syncSubChips() {
+    $$('#subChips .chip').forEach(function (chip) {
+      var id = chip.getAttribute('data-sub');
+      chip.setAttribute('aria-pressed', state.selectedSubmoods.indexOf(id) !== -1 ? 'true' : 'false');
+    });
+    $$('#moodChips .chip').forEach(function (chip) {
+      var id = chip.getAttribute('data-mood');
+      chip.setAttribute('aria-pressed', state.selectedMoods.indexOf(id) !== -1 ? 'true' : 'false');
+    });
+    var hint = $('#subHint');
+    if (hint) {
+      hint.textContent = state.selectedSubmoods.length
+        ? '고른 세부 감정: ' + state.selectedSubmoods.map(function (id) { return SUBMOOD_BY_ID[id] ? SUBMOOD_BY_ID[id].label : id; }).join(' · ')
+        : '세부 감정을 고르면 위 기본 감정도 함께 선택돼요.';
+    }
   }
 
   function updateIntensity() {
@@ -1920,9 +3001,32 @@
   function prefillSong(title, artist, keepTab) {
     $('#fSong').value = title || '';
     if (artist) $('#fArtist').value = artist;
+    var pid = platformForTrack(title, artist);
+    if (pid && $('#fPlatform')) $('#fPlatform').value = pid;
     if (!keepTab) switchTab('record');
     setTimeout(function () { $('#fSong').focus({ preventScroll: true }); }, 60);
     toast('‘' + (title || '') + '’ 로 감정을 남겨 보세요');
+  }
+
+  /* 그 곡을 가장 많이 들은 플랫폼 */
+  function platformForTrack(title, artist) {
+    var ds = state.dataset;
+    if (!ds || !ds.tracks) return '';
+    var k = String(title || '').toLowerCase() + '\u0000' + String(artist || '').toLowerCase();
+    for (var i = 0; i < ds.tracks.length; i++) {
+      var t = ds.tracks[i];
+      if ((t.title || '').toLowerCase() + '\u0000' + (t.artist || '').toLowerCase() === k) {
+        return topPlatformKey(t.platforms);
+      }
+    }
+    return '';
+  }
+
+  function topPlatformKey(map) {
+    if (!map) return '';
+    var best = '', bv = 0;
+    Object.keys(map).forEach(function (k) { if (map[k] > bv) { bv = map[k]; best = k; } });
+    return best;
   }
 
   function findArtistByTitle(title) {
@@ -1951,8 +3055,14 @@
   function entryHTML(e) {
     var moodHTML = e.moods.map(function (id) {
       var m = MOOD_BY_ID[id];
+      if (!m) return '';
       return '<span class="pill" style="border-color:' + m.color + '55;color:' + m.color + '" title="' + esc(m.desc) + '">' +
         '<span aria-hidden="true">' + m.emoji + '</span>' + m.label + '</span>';
+    }).join('');
+    var subHTML = (e.submoods || []).map(function (id) {
+      var s = SUBMOOD_BY_ID[id];
+      if (!s) return '';
+      return '<span class="pchip" title="' + esc(s.desc) + '">' + esc(s.label) + '</span>';
     }).join('');
     var dots = '';
     for (var i = 1; i <= 5; i++) dots += '<i class="' + (i <= e.intensity ? 'on' : '') + '"></i>';
@@ -1960,10 +3070,12 @@
     var va = entryVA(e);
     var q = QUAD_BY_ID[quadOf(va.v, va.a)];
     var conf = CONF_BY_ID[e.confidence] || CONF_BY_ID.mid;
+    var st = entryStatus(e);
     var meta = [];
     meta.push(SLOT_BY_ID[e.slot] ? SLOT_BY_ID[e.slot].short : '');
     meta.push(q.id + ' ' + q.name);
     meta.push(conf.label);
+    if (e.plays) meta.push(num(e.plays) + '회 재생');
     if (e.contexts && e.contexts.length) {
       meta.push(e.contexts.map(function (c) { return CONTEXT_BY_ID[c] ? CONTEXT_BY_ID[c].label : ''; }).filter(Boolean).join(' · '));
     }
@@ -1973,8 +3085,13 @@
       ? '<div style="display:flex;align-items:baseline;gap:6px;min-width:0;flex-wrap:wrap">' +
           '<span class="entry-song">' + esc(e.song) + '</span>' +
           (e.artist ? '<span class="entry-artist">' + esc(e.artist) + '</span>' : '') +
+          (e.platform ? platformChip(e.platform) : '') +
         '</div>'
       : '<div class="entry-artist">곡 없이 남긴 기록</div>';
+
+    var statusHTML = st === 'unconfirmed'
+      ? '<span class="pchip" style="border-color:var(--accent);color:var(--accent-ink)">자동 분류 · 미확인</span>'
+      : (st === 'confirmed' ? '<span class="pchip">확인 완료</span>' : '');
 
     return '<div class="entry" data-id="' + esc(e.id) + '">' +
       '<div class="entry-top">' + moodHTML +
@@ -1984,9 +3101,11 @@
           '<button class="mini" type="button" data-act="del" data-id="' + esc(e.id) + '">삭제</button>' +
         '</span></div>' +
       songLine +
-      '<div class="tagline">' + meta.map(function (t) { return '<span class="t">' + esc(t) + '</span>'; }).join('') + '</div>' +
+      (subHTML ? '<div class="pchips">' + subHTML + '</div>' : '') +
+      '<div class="tagline">' + statusHTML + meta.map(function (t) { return '<span class="t">' + esc(t) + '</span>'; }).join('') + '</div>' +
       (e.memo ? '<p class="entry-memo">' + esc(e.memo) + '</p>' : '') +
-      (e.sample ? '<p class="entry-artist">샘플 기록 — 연구용으로 내보내지 않아요</p>' : '') +
+      (e.auto && e.autoRule ? '<p class="entry-artist" style="opacity:.7">자동 분류 근거 — ' + esc(e.autoRule) + '</p>' : '') +
+      (e.sample ? '<p class="entry-artist">샘플 기록 — 내보내기에 포함되지 않아요</p>' : '') +
       '</div>';
   }
 
@@ -2048,6 +3167,7 @@
     if (!e) return;
     state.editingId = id;
     state.selectedMoods = e.moods.slice();
+    state.selectedSubmoods = (e.submoods || []).slice();
     state.selectedContexts = (e.contexts || []).slice();
     state.confidence = e.confidence || 'mid';
     $('#fDate').value = e.date;
@@ -2060,6 +3180,7 @@
     $('#cancelEditBtn').hidden = false;
     renderForm();
     if ($('#fSlot')) $('#fSlot').value = e.slot || slotForHour(new Date().getHours());
+    if ($('#fPlatform')) $('#fPlatform').value = e.platform || '';
     switchTab('record');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -2067,6 +3188,7 @@
   function resetForm() {
     state.editingId = null;
     state.selectedMoods = [];
+    state.selectedSubmoods = [];
     state.selectedContexts = [];
     state.confidence = 'mid';
     state.quadFocus = null;
@@ -2078,6 +3200,8 @@
     $('#saveBtn').textContent = '기록 저장';
     $('#cancelEditBtn').hidden = true;
     renderForm();
+    if ($('#fPlatform')) $('#fPlatform').value = '';
+    syncSubChips();
   }
 
   function deleteEntry(id) {
@@ -2093,7 +3217,14 @@
 
   function persistEntries() {
     var ok = saveJSON(KEY_ENTRIES, state.entries);
-    if (!ok) toast('저장 공간이 부족해 기록을 저장하지 못했어요. 내보내기로 백업해 주세요.');
+    if (!ok) {
+      if (!state.storageWarned) {
+        state.storageWarned = true;
+        toast('저장 공간이 부족해 이번 기록은 브라우저에 남지 않아요. 내보내기로 백업해 주세요.');
+      }
+      renderStorageNote();
+      return;
+    }
     renderStorageNote();
   }
 
@@ -2118,7 +3249,9 @@
       slot: $('#fSlot') ? $('#fSlot').value : slotForHour(new Date().getHours()),
       song: song,
       artist: artist,
+      platform: $('#fPlatform') ? $('#fPlatform').value : '',
       moods: state.selectedMoods.slice(),
+      submoods: state.selectedSubmoods.slice(),
       intensity: Number($('#fIntensity').value),
       contexts: state.selectedContexts.slice(),
       confidence: state.confidence,
@@ -2142,6 +3275,354 @@
     renderAll();
     var tl = $('#timeline');
     if (tl) tl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ============================================================
+     6-B. 자동 초벌 분류 · 들으면서 정리 · 시간대 분석
+     ============================================================ */
+  var AUTO_CCM_ARTISTS = [/워십/, /worship/i, /마커스/, /markers/i, /어노인팅/, /anointing/i, /제이어스/, /j-?us\b/i, /위러브/, /welove/i, /히즈윌/, /hiswill/i, /찬양/, /ccm/i, /gospel/i, /hymn/i, /성가/i, /제이워십/, /jworship/i, /예수전도단/, /ywam/i, /아가파오/, /agapao/i, /elevation worship/i, /소진영/, /강명식/, /워십메이커스/, /라이프워십/, /온누리/];
+  var AUTO_CCM_WORDS = [/찬양/, /주님/, /예수/, /은혜/, /기도합니다/, /worship/i, /hymn/i, /gospel/i, /할렐루야/];
+  var AUTO_HARD_ARTISTS = [/superbee/i, /d\.?ark/i, /dok2/i, /the quiett/i, /changmo/i, /ash island/i, /gifted/i, /1nonly/i, /lil\s/i, /g-?eazy/i, /eminem/i, /linkin park/i, /three days grace/i, /breaking benjamin/i, /thousand foot krutch/i, /skillet/i, /hollywood undead/i, /drake/i];
+  var AUTO_HARD_WORDS = [/drill/i, /cypher/i, /\bhard\b/i, /\brage\b/i, /\bflex\b/i, /\bboss\b/i, /\btrap\b/i, /\bgang\b/i, /\bdirty\b/i, /\b(?:savage|beast|monster|war|burn|fire)\b/i, /쎈/, /빡/, /분노/, /화가 나/, /짜증/, /미친/];
+  var AUTO_VENT_WORDS = [/분노/, /짜증/, /화가/, /\brage\b/i, /\bangry\b/i, /\bhate\b/i, /\bfuck\b/i, /\bdamn\b/i, /미친/, /씹/];
+  var AUTO_RAP_ARTISTS = [/ash island/i, /changmo/i, /superbee/i, /d\.?ark/i, /be'?o\b/i, /big ?naughty/i, /하온/, /haon/i, /layone/i, /trapeia/i, /the quiett/i, /gifted/i, /1nonly/i, /g-?eazy/i, /lil\s/i, /drake/i, /j\.?cole/i, /kendrick/i, /dok2/i];
+  var AUTO_RAP_WORDS = [/\brap\b/i, /hip.?hop/i, /\bcypher\b/i, /\bverse\b/i, /\bmixtape\b/i, /\bfeat\.?\s/i];
+  var AUTO_BALLAD_ARTISTS = [/btob/i, /10cm/i, /jung joon young/i, /정준영/, /big ?naughty/i, /akmu/i, /lauv/i, /gracie abrams/i, /henry moodie/i, /shawn mendes/i, /정승환/, /백예린/, /폴킴/, /성시경/, /김동률/, /이적/, /이무진/, /아이유/];
+  var AUTO_SAD_STRONG = [/이별/, /눈물/, /그리움/, /후회/, /미련/, /슬픔/, /외로/, /\bbreak\s?up\b/i, /\btears?\b/i, /\bsad\b/i, /\blonely\b/i, /\bgoodbye\b/i, /\bheartbreak\b/i, /miss you/i];
+  var AUTO_LOVE_WORDS = [/사랑/, /\blove\b/i];
+  var AUTO_DANCE_WORDS = [/\bdance\b/i, /\bremix\b/i, /\bedm\b/i, /\bclub\b/i, /\bparty\b/i, /\bdj\b/i, /\bhouse\b/i, /\btechno\b/i, /\bpop\b/i];
+
+  function anyMatch(list, text) {
+    for (var i = 0; i < list.length; i++) if (list[i].test(text)) return list[i];
+    return null;
+  }
+
+  function peakHourOf(hours) {
+    if (!hours || !hours.length) return null;
+    var best = -1, bi = null;
+    for (var i = 0; i < 24; i++) {
+      var v = Number(hours[i]) || 0;
+      if (v > best) { best = v; bi = i; }
+    }
+    return best > 0 ? bi : null;
+  }
+
+  function bandShare(hours, bandId) {
+    if (!hours || !hours.length) return 0;
+    var b = BAND_BY_ID[bandId], sum = 0, total = 0;
+    for (var i = 0; i < 24; i++) {
+      var v = Number(hours[i]) || 0;
+      total += v;
+      if (b.hours.indexOf(i) !== -1) sum += v;
+    }
+    return total ? sum / total : 0;
+  }
+
+  /* 규칙 기반 초벌 분류: 아티스트·곡명 키워드 + 청취 시간대. 오디오 분석은 아니고, 고칠 수 있는 초안이다. */
+  function classifyTrack(title, artist, hours, count) {
+    var ttl = String(title || '');
+    var art = String(artist || '');
+    var hay = ttl + ' ' + art;
+    var repeat = Math.max(1, Number(count) || 1);
+    var ccm = anyMatch(AUTO_CCM_ARTISTS, art) || anyMatch(AUTO_CCM_WORDS, ttl);
+    var hard = anyMatch(AUTO_HARD_ARTISTS, art) || anyMatch(AUTO_HARD_WORDS, ttl);
+    var rap = anyMatch(AUTO_RAP_ARTISTS, art) || anyMatch(AUTO_RAP_WORDS, hay);
+    var balladArt = anyMatch(AUTO_BALLAD_ARTISTS, art);
+    var sadStrong = anyMatch(AUTO_SAD_STRONG, ttl);
+    var love = anyMatch(AUTO_LOVE_WORDS, ttl);
+    var dawn = bandShare(hours, 'dawn');
+    var night = bandShare(hours, 'evening');
+    var dayside = bandShare(hours, 'morning') + bandShare(hours, 'afternoon');
+    var pick, rule, intensity = 3, contexts = [];
+
+    if (ccm) {
+      pick = ['calm_sleep']; rule = 'CCM·찬양 → 잘 때 · 평온'; intensity = 2;
+    } else if (hard) {
+      if (anyMatch(AUTO_VENT_WORDS, ttl)) {
+        pick = ['hot_vent', 'hot_beat']; rule = '센 비트 랩 · 분노 키워드 → 짜증 · 분출'; intensity = 5;
+      } else {
+        pick = ['hot_beat']; rule = '센 비트 랩·하드트랙 → 강렬함 · 빡센 비트'; intensity = 4;
+      }
+      contexts = ['move'];
+    } else if (sadStrong || (love && balladArt)) {
+      pick = (sadStrong && /외로|lonely|우울/i.test(ttl)) ? ['sad_lonely'] : ['sad_breakup'];
+      rule = sadStrong ? '이별·눈물·후회 키워드 → 슬픔 · 이별/그리움' : '사랑 발라드 → 슬픔 · 이별/그리움';
+      intensity = 4;
+    } else if (balladArt) {
+      pick = ['sad_dawn']; rule = '발라드 아티스트 → 먹먹함 · 새벽 감성'; intensity = 3;
+    } else if (rap) {
+      pick = ['up_tense']; rule = '랩·빠른 곡 → 신남 · 텐션업'; intensity = 4; contexts = ['move'];
+    } else if (anyMatch(AUTO_DANCE_WORDS, hay)) {
+      pick = ['up_groove']; rule = '댄스·팝 → 신남 · 리듬/그루브'; intensity = 4;
+    } else {
+      pick = ['up_bright']; rule = '일반 대중음악 → 신남 · 산뜻/기분좋음'; intensity = 3;
+    }
+
+    /* 시간대 보정: 새벽이 가장 많이 들은 시간대인 잔잔한 곡은 슬픔 쪽으로 (가은님 기준). 빠른 랩은 새벽에도 신남으로 둔다 */
+    var dawnTop = dawn >= 0.35 && repeat >= 2 && dawn >= night &&
+      dawn >= bandShare(hours, 'morning') && dawn >= bandShare(hours, 'afternoon');
+    if (dawnTop && (pick[0] === 'up_bright' || pick[0] === 'up_groove')) {
+      pick = ['sad_dawn'];
+      rule += ' · 새벽이 가장 많은 시간대(' + Math.round(dawn * 100) + '%) → 먹먹함(새벽)으로 보정';
+      intensity = 3; contexts = [];
+    } else if (dawnTop && pick[0] === 'up_tense') {
+      rule += ' · 새벽 청취 ' + Math.round(dawn * 100) + '%';
+    }
+    if (pick[0] === 'calm_sleep' && dawn < 0.4 && night < 0.4 && dayside >= 0.75) {
+      rule += ' · 낮 시간대에 주로 들음';
+    }
+
+    var moods = [];
+    pick.forEach(function (id) {
+      var s = SUBMOOD_BY_ID[id];
+      if (s && moods.indexOf(s.parent) === -1) moods.push(s.parent);
+    });
+    return { submoods: pick, moods: moods, rule: rule, intensity: intensity, contexts: contexts };
+  }
+
+  function autoTagDataset() {
+    var ds = state.dataset;
+    if (!ds || !ds.tracks || !ds.tracks.length) { toast('먼저 시청 기록을 올려 주세요'); return; }
+    var existing = {};
+    state.entries.forEach(function (e) { if (e.song) existing[trackKey(e.song, e.artist)] = 1; });
+    var made = 0;
+    var added = [];
+    ds.tracks.forEach(function (t) {
+      var k = trackKey(t.title, t.artist);
+      if (existing[k]) return;
+      existing[k] = 1;
+      var c = classifyTrack(t.title, t.artist, t.hours, t.count);
+      var peak = peakHourOf(t.hours);
+      var slotHour = peak == null ? 21 : peak;
+      var last = t.last ? new Date(t.last) : new Date();
+      if (isNaN(last.getTime())) last = new Date();
+      added.push(normalizeEntry({
+        id: 'auto_' + simpleHash(k).toString(36) + '_' + (++made),
+        date: ymd(last), slot: slotForHour(slotHour),
+        song: t.title, artist: t.artist || '', platform: topPlatformKey(t.platforms),
+        moods: c.moods, submoods: c.submoods, intensity: c.intensity, confidence: 'low',
+        contexts: c.contexts, plays: Math.round(t.count),
+        peakHour: peak, timeBand: bandForHour(slotHour),
+        auto: true, autoRule: c.rule, status: 'unconfirmed',
+        createdAt: last.toISOString()
+      }));
+    });
+    if (!added.length) { toast('새로 분류할 곡이 없어요'); return; }
+    state.entries = state.entries.concat(added);
+    persistEntries();
+    renderAll();
+    toast(num(added.length) + '곡의 초벌 분류를 만들었어요 — 들으면서 확인해 보세요');
+  }
+
+  function entryBand(e) {
+    if (e.timeBand && BAND_BY_ID[e.timeBand]) return e.timeBand;
+    if (e.peakHour != null) return bandForHour(e.peakHour);
+    if (e.slot && SLOT_BY_ID[e.slot]) return bandForHour(SLOT_BY_ID[e.slot].hours[0]);
+    return 'evening';
+  }
+
+  function reviewList() {
+    var all = state.reviewAll ? state.entries.slice() : state.entries.filter(function (e) { return entryStatus(e) === 'unconfirmed'; });
+    return all.sort(function (a, b) {
+      if ((b.plays || 0) !== (a.plays || 0)) return (b.plays || 0) - (a.plays || 0);
+      return a.song.localeCompare(b.song, 'ko');
+    });
+  }
+
+  function renderReview() {
+    var card = $('#reviewCard');
+    if (!card) return;
+    var unconf = state.entries.filter(function (e) { return entryStatus(e) === 'unconfirmed'; }).length;
+    var confd = state.entries.filter(function (e) { return e.status === 'confirmed'; }).length;
+    var scope = $('#reviewScope');
+    if (scope) scope.textContent = '미확인 ' + num(unconf) + ' · 확인 완료 ' + num(confd);
+    var note = $('#reviewNote');
+    if (note) {
+      note.textContent = unconf
+        ? '많이 들은 곡부터 나옵니다. 재생 링크로 들어보고 마음에 맞게 고쳐 주세요. 고친 내용은 바로 저장돼요.'
+        : (state.entries.length ? '미확인 곡이 없어요. 전체 보기로 지나간 기록을 다시 볼 수 있어요.' : '아직 기록이 없어요 — 위 버튼으로 시청 기록에서 초벌 분류를 만들어 보세요.');
+    }
+    $$('#reviewAllBtn, #reviewUnconfirmedBtn').forEach(function (b) {
+      var on = (b.id === 'reviewAllBtn') === !!state.reviewAll;
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+
+    var list = reviewList();
+    if (!list.length) {
+      card.innerHTML = '<div class="empty"><span class="em">☑</span>지금 정리할 곡이 없어요.<br>시청 기록을 올리고 <b>초벌 분류 만들기</b>를 눌러 보세요.</div>';
+      return;
+    }
+    if (state.reviewIndex >= list.length) state.reviewIndex = 0;
+    var e = list[state.reviewIndex];
+    var q = encodeURIComponent((e.song || '') + ' ' + (e.artist || ''));
+    var band = BAND_BY_ID[entryBand(e)];
+
+    var chipHTML = SUBMOODS.map(function (s) {
+      return '<button type="button" class="chip" data-rs="' + s.id + '" aria-pressed="' +
+        ((e.submoods || []).indexOf(s.id) !== -1 ? 'true' : 'false') + '" title="' + esc(s.desc) + '">' + esc(s.label) + '</button>';
+    }).join('');
+
+    card.innerHTML =
+      '<div class="recitem top">' +
+        '<div class="rec-head">' +
+          '<span class="rec-rank">' + (state.reviewIndex + 1) + ' / ' + num(list.length) + '</span>' +
+          '<span class="rec-title">' + esc(e.song || '곡 없음') + '</span>' +
+          (e.artist ? '<span class="rec-artist">' + esc(e.artist) + '</span>' : '') +
+        '</div>' +
+        '<div class="pchips">' +
+          (e.platform ? platformChip(e.platform) : '') +
+          (e.plays ? '<span class="pchip">' + num(e.plays) + '회 재생</span>' : '') +
+          (band ? '<span class="pchip">' + band.label + ' ' + band.range + '</span>' : '') +
+          (entryStatus(e) === 'unconfirmed' ? '<span class="pchip" style="border-color:var(--accent)">미확인</span>' : '<span class="pchip">확인 완료</span>') +
+        '</div>' +
+        (e.autoRule ? '<p class="entry-artist" style="opacity:.85">초벌 근거 — ' + esc(e.autoRule) + '</p>' : '') +
+        '<div class="chips" id="reviewChips">' + chipHTML + '</div>' +
+        '<div class="data-row">' +
+          '<a class="btn small" target="_blank" rel="noopener" href="https://music.youtube.com/search?q=' + q + '">YouTube Music</a>' +
+          '<a class="btn small" target="_blank" rel="noopener" href="https://open.spotify.com/search/' + q + '">Spotify</a>' +
+          '<a class="btn small" target="_blank" rel="noopener" href="https://www.melon.com/search/total/index.htm?q=' + q + '">멜론</a>' +
+        '</div>' +
+        '<div class="data-row">' +
+          '<button class="btn small" type="button" id="reviewPrev">← 이전</button>' +
+          '<button class="btn primary small" type="button" id="reviewConfirm">확인 완료 →</button>' +
+          '<button class="btn small" type="button" id="reviewNext">다음</button>' +
+          '<button class="btn ghost small" type="button" id="reviewEdit">자세히 수정</button>' +
+        '</div>' +
+      '</div>';
+
+    $$('#reviewChips .chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var id = chip.getAttribute('data-rs');
+        var at = (e.submoods || []).indexOf(id);
+        if (at === -1) e.submoods.push(id);
+        else e.submoods.splice(at, 1);
+        var moods = [];
+        e.submoods.forEach(function (sid) {
+          var s = SUBMOOD_BY_ID[sid];
+          if (s && moods.indexOf(s.parent) === -1) moods.push(s.parent);
+        });
+        e.moods = moods.length ? moods : e.moods;
+        e.status = 'unconfirmed';
+        persistEntries();
+        renderReview();
+      });
+    });
+    var prev = $('#reviewPrev');
+    if (prev) prev.addEventListener('click', function () {
+      state.reviewIndex = (state.reviewIndex - 1 + list.length) % list.length;
+      renderReview();
+      scrollReviewTop();
+    });
+    var next = $('#reviewNext');
+    if (next) next.addEventListener('click', function () {
+      state.reviewIndex = (state.reviewIndex + 1) % list.length;
+      renderReview();
+      scrollReviewTop();
+    });
+    var confirmBtn = $('#reviewConfirm');
+    if (confirmBtn) confirmBtn.addEventListener('click', function () {
+      state.entries = state.entries.map(function (x) {
+        if (x.id !== e.id) return x;
+        x.status = 'confirmed';
+        x.confidence = 'mid';
+        return x;
+      });
+      persistEntries();
+      if (state.reviewAll) state.reviewIndex++;
+      renderReview();
+      renderHero();
+      toast('확인 완료로 표시했어요');
+    });
+    var edit = $('#reviewEdit');
+    if (edit) edit.addEventListener('click', function () { startEdit(e.id); });
+  }
+
+  function scrollReviewTop() {
+    var card = $('#reviewCard');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function renderBandAnalysis() {
+    var ds = state.dataset;
+    var playsBox = $('#bandPlays');
+    if (!playsBox) return;
+    var counts = { dawn: 0, morning: 0, afternoon: 0, evening: 0 };
+    var total = 0;
+    if (ds && ds.hours) {
+      ds.hours.forEach(function (v, h) {
+        var b = bandForHour(h);
+        counts[b] += v;
+        total += v;
+      });
+    }
+    var max = 1;
+    Object.keys(counts).forEach(function (k) { if (counts[k] > max) max = counts[k]; });
+    playsBox.innerHTML = TIME_BANDS.map(function (b) {
+      var v = counts[b.id];
+      var pct = total ? Math.round(v / total * 100) : 0;
+      return '<div class="row"><span class="k">' + b.label + ' <span style="color:var(--muted);font-size:10.5px">' + b.range + '</span></span>' +
+        '<span class="v">' + num(v) + '회' + (total ? ' · ' + pct + '%' : '') + '</span>' +
+        '<span class="bar"><i style="width:' + Math.max(2, Math.round(v / max * 100)) + '%"></i></span></div>';
+    }).join('');
+
+    var moodBox = $('#bandMoods');
+    if (moodBox) {
+      var byBand = {};
+      TIME_BANDS.forEach(function (b) { byBand[b.id] = { n: 0, ids: {} }; });
+      state.entries.forEach(function (e) {
+        var band = entryBand(e);
+        if (!byBand[band]) return;
+        byBand[band].n++;
+        var ids = (e.submoods && e.submoods.length) ? e.submoods : (e.moods || []);
+        ids.forEach(function (id) { byBand[band].ids[id] = (byBand[band].ids[id] || 0) + 1; });
+      });
+      moodBox.innerHTML = TIME_BANDS.map(function (b) {
+        var d = byBand[b.id];
+        var top = Object.keys(d.ids).sort(function (x, y) { return d.ids[y] - d.ids[x]; }).slice(0, 2);
+        var label = top.map(function (id) {
+          var s = SUBMOOD_BY_ID[id];
+          var m = MOOD_BY_ID[id];
+          return s ? s.label : (m ? m.label : id);
+        }).join(' · ');
+        return '<div class="row"><span class="k">' + b.label + '</span><span class="v">' + (d.n ? num(d.n) + '건' : '—') +
+          (label ? ' · ' + esc(label) : '') + '</span></div>';
+      }).join('');
+    }
+
+    var note = $('#bandNote');
+    if (note) {
+      note.textContent = '새벽(00–05시)에 들은 곡은 슬픔·잠 쪽으로 기울기 쉬워, 초벌 분류도 새벽 비중이 45%를 넘으면 그쪽으로 보정합니다. 시간대는 곡별 주요 청취 시각으로 계산해요.';
+    }
+  }
+
+  function renderPlatformDist() {
+    var box = $('#platformDist');
+    if (!box) return;
+    var ds = state.dataset;
+    var map = (ds && ds.platforms) ? ds.platforms : {};
+    var countFromEntries = false;
+    if (!Object.keys(map).length) {
+      map = {};
+      state.entries.forEach(function (e) { if (e.platform) map[e.platform] = (map[e.platform] || 0) + 1; });
+      countFromEntries = true;
+    }
+    var keys = Object.keys(map);
+    var scope = $('#platformScope');
+    if (scope) scope.textContent = keys.length ? keys.length + '개 플랫폼' : '';
+    if (!keys.length) {
+      box.innerHTML = '<div class="row"><span class="k" style="color:var(--muted)">아직 플랫폼 정보가 없어요</span><span class="v">0</span></div>';
+      return;
+    }
+    keys.sort(function (a, b) { return map[b] - map[a]; });
+    var max = map[keys[0]] || 1;
+    var total = 0;
+    keys.forEach(function (k) { total += map[k]; });
+    box.innerHTML = keys.map(function (k) {
+      var w = Math.max(3, Math.round(map[k] / max * 100));
+      return '<div class="row"><span class="k">' + platformChip(k) + '</span>' +
+        '<span class="v">' + num(map[k]) + (countFromEntries ? '건' : '회') + ' · ' + Math.round(map[k] / total * 100) + '%</span>' +
+        '<span class="bar"><i style="width:' + w + '%"></i></span></div>';
+    }).join('');
   }
 
   /* ============================================================
@@ -2268,12 +3749,9 @@
      8. 저장 / 내보내기 / 가져오기
      ============================================================ */
   function renderStorageNote() {
-    var note = !state.dataset
-      ? '시청 기록 없음'
-      : '시청 기록 요약';
     var text = state.storageOK
-      ? '이 브라우저에 <b>' + num(state.entries.length) + '개</b>의 마음과 ' + note + '이 저장돼 있어요.'
-      : '<b>이 브라우저에서는 자동 저장이 막혀 있어요.</b> 기록은 지금 화면에만 남으니, 작업 후 꼭 내보내기로 파일을 보관해 주세요.';
+      ? '이 브라우저에 마음 <b>' + num(state.entries.length) + '개</b>' + (state.dataset ? '와 시청 기록' : '') + '이 저장돼 있어요.'
+      : '<b>이 브라우저에서는 자동 저장이 막혀 있어요.</b> 지금 화면에만 남으니 작업 후 내보내기로 보관해 주세요.';
     var a = $('#storageNote');
     var b = $('#storageNote2');
     if (a) a.innerHTML = text;
@@ -2343,7 +3821,7 @@
 
   function loadSample() {
     var plays = buildSamplePlays();
-    state.dataset = aggregate(plays, 'sample', true);
+    state.dataset = aggregate(plays, 'sample', true, { fileName: '샘플 데이터 (여러 플랫폼)' });
     saveJSON(KEY_DATASET, state.dataset);
 
     // 샘플 감정 기록은 아직 아무 기록도 없을 때만 채워 넣기
@@ -2356,55 +3834,150 @@
     toast('샘플 데이터를 불러왔어요');
   }
 
-  function handleFile(file) {
-    if (!file) return;
-    if (!/\.json$/i.test(file.name) && file.type && file.type.indexOf('json') === -1) {
-      toast('JSON 파일을 올려 주세요 (.json)');
+  function loadPlatformSample(platformId) {
+    var plays = buildPlatformSamplePlays(platformId);
+    state.dataset = aggregate(plays, 'sample', true, { fileName: platformLabel(platformId) + ' 샘플' });
+    saveJSON(KEY_DATASET, state.dataset);
+    if (!state.entries.length) {
+      state.entries = buildSampleEntries().map(normalizeEntry);
+      persistEntries();
+    }
+    state.activeMood = null;
+    renderAll();
+    toast(platformLabel(platformId) + ' 샘플을 불러왔어요');
+  }
+
+  /* ---------- 파일 읽기 → 분석 ---------- */
+  var ingestState = { mode: 'replace', plays: [], sources: [], notes: [], errors: [], queue: [] };
+
+  function readFileText(file) {
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(String(r.result)); };
+      r.onerror = function () { reject(new Error('READ')); };
+      r.readAsText(file);
+    });
+  }
+
+  function topPlatformOf(plays) {
+    var c = {};
+    (plays || []).forEach(function (p) { c[p.platform || 'other'] = (c[p.platform || 'other'] || 0) + 1; });
+    var best = '', bv = 0;
+    Object.keys(c).forEach(function (k) { if (c[k] > bv) { bv = c[k]; best = k; } });
+    return best || 'other';
+  }
+
+  function errLabel(e) {
+    var m = e && e.message;
+    if (m === 'BAD_JSON') return 'JSON 형식이 깨짐';
+    if (m === 'BAD_XML') return 'XML 형식이 깨짐';
+    if (m === 'NOT_RECORDS') return '곡 기록 목록이 아님';
+    if (m === 'NO_ROWS') return '안에 내용이 없음';
+    if (m === 'READ') return '읽지 못함';
+    return '해석하지 못함';
+  }
+
+  function handleFile(file) { handleFiles(file ? [file] : [], state.mergeMode ? 'merge' : 'replace'); }
+
+  function handleFiles(files, mode) {
+    var arr = Array.prototype.slice.call(files || []).filter(Boolean);
+    if (!arr.length) return;
+    ingestState = { mode: mode || 'replace', plays: [], sources: [], notes: [], errors: [], queue: [] };
+    var pick = $('#pickFileBtn');
+    var pickText = pick ? pick.textContent : '';
+    if (pick) { pick.textContent = '읽는 중…'; pick.disabled = true; }
+
+    Promise.all(arr.map(function (f) {
+      return readFileText(f).then(function (text) { return { file: f, text: text }; }, function () { return { file: f, error: 'READ' }; });
+    })).then(function (items) {
+      items.forEach(function (it) {
+        if (it.error) { ingestState.errors.push(it.file.name + ' — ' + errLabel(it.error)); return; }
+        try {
+          var res = parseFileText(it.file.name, it.text);
+          if (res.needsMapping && res.table) {
+            ingestState.queue.push({ fileName: it.file.name, table: res.table, mapping: res.mapping, platform: topPlatformOf(res.plays) || platformFromText(it.file.name) });
+          } else {
+            absorb(it.file.name, res);
+          }
+        } catch (e) {
+          ingestState.errors.push(it.file.name + ' — ' + errLabel(e));
+        }
+      });
+      if (pick) { pick.textContent = pickText || '파일 올리기'; pick.disabled = false; }
+      processQueue();
+    });
+  }
+
+  function absorb(fileName, res) {
+    var plays = res.plays || [];
+    if (!plays.length) {
+      ingestState.errors.push(fileName + ' — 곡 기록을 찾지 못했어요');
       return;
     }
-    var pick = $('#pickFileBtn');
-    var original = pick ? pick.textContent : '';
-    if (pick) { pick.textContent = '분석하는 중…'; pick.disabled = true; }
+    var platform = topPlatformOf(plays);
+    ingestState.plays = ingestState.plays.concat(plays);
+    ingestState.sources.push({ fileName: fileName, platform: platform, plays: plays.length, kind: res.fileKind || '' });
+    if (res.skipped) ingestState.notes.push(fileName + ' 30초 미만 ' + num(res.skipped) + '개 제외');
+    if (res.removed) ingestState.notes.push(fileName + ' 지워진 곡 ' + num(res.removed) + '개 제외');
+    if (res.ignored) ingestState.notes.push(fileName + ' 일반 YouTube 영상 ' + num(res.ignored) + '개 제외');
+    if (res.podcasts) ingestState.notes.push(fileName + ' 팟캐스트 ' + num(res.podcasts) + '개 제외');
+    if (res.noTime) ingestState.notes.push(fileName + ' 시각 없는 기록 ' + num(res.noTime) + '개 제외');
+    if (res.isLibrary) ingestState.notes.push(fileName + ' — 보관함 파일은 재생 횟수·마지막 재생일만 있어 시간대는 비어 있어요');
+    if (res.table && res.needsMapping) ingestState.notes.push(fileName + ' — 열을 자동으로 맞췄어요');
+  }
 
-    var reader = new FileReader();
-    reader.onload = function () {
-      setTimeout(function () {
-        try {
-          var parsed = JSON.parse(String(reader.result));
-          var result = parseWatchHistory(parsed);
-          if (!result.plays.length) {
-            toast('YouTube Music 기록을 찾지 못했어요. 파일에 음악 기록이 있는지 확인해 주세요.');
-          } else {
-            state.dataset = aggregate(result.plays, 'takeout', false);
-            state.dataset.ignored = result.ignored;
-            state.dataset.fileName = file.name;
-            if (!saveJSON(KEY_DATASET, state.dataset)) {
-              toast('파일은 분석했지만 저장 공간이 부족해 다음에 다시 열면 사라져요.');
-            }
-            state.activeMood = null;
-            renderAll();
-            var msg = num(result.plays.length) + '곡의 기록을 분석했어요';
-            var extra = [];
-            if (result.ignored) extra.push('YouTube 영상 ' + num(result.ignored) + '개');
-            if (result.removed) extra.push('이미 지워진 곡 ' + num(result.removed) + '개');
-            if (extra.length) msg += ' (' + extra.join(' · ') + ' 제외)';
-            toast(msg);
-          }
-        } catch (err) {
-          toast(err && err.message === 'NOT_WATCH_HISTORY'
-            ? 'watch-history.json 형식이 아니에요'
-            : '파일을 읽는 중 문제가 생겼어요 (JSON 형식인지 확인해 주세요)');
-        } finally {
-          if (pick) { pick.textContent = original || '내 기록 올리기'; pick.disabled = false; }
-          $('#fileInput').value = '';
-        }
-      }, 30);
-    };
-    reader.onerror = function () {
-      toast('파일을 읽지 못했어요');
-      if (pick) { pick.textContent = original || '내 기록 올리기'; pick.disabled = false; }
-    };
-    reader.readAsText(file);
+  function processQueue() {
+    if (!ingestState.queue.length) { finishIngest(); return; }
+    state.mapping = ingestState.queue.shift();
+    renderIntake();
+  }
+
+  function finishIngest() {
+    var st = ingestState;
+    if (!st.plays.length) {
+      renderIntake();
+      toast(st.errors.length ? ('읽지 못한 파일 — ' + st.errors[0]) : '분석할 곡 기록을 찾지 못했어요');
+      return;
+    }
+    var ds = aggregate(st.plays, 'import', false, {
+      sources: st.sources,
+      notes: st.notes,
+      fileName: st.sources.map(function (s) { return s.fileName; }).join(' + ')
+    });
+    if (st.mode === 'merge' && state.dataset && !state.dataset.sample) ds = mergeDatasets(state.dataset, ds);
+    state.dataset = ds;
+    state.fromSeed = false;
+    state.activeMood = null;
+    if (!saveJSON(KEY_DATASET, state.dataset)) {
+      toast('분석은 했지만 저장 공간이 부족해 다음에 열면 사라져요.');
+    }
+    renderAll();
+    var plats = ds.platforms ? Object.keys(ds.platforms).length : 0;
+    var msg = num(ds.plays) + '회 재생을 분석했어요' + (plats > 1 ? ' · ' + plats + '개 플랫폼' : '');
+    if (st.errors.length) msg += ' · ' + st.errors.length + '개 파일 실패';
+    toast(msg);
+  }
+
+  function runPaste() {
+    var area = $('#pasteArea');
+    if (!area) return;
+    var platform = ($('#pastePlatform') ? $('#pastePlatform').value : state.pastePlatform) || 'other';
+    var res = parsePastedText(area.value, { order: state.pasteOrder, platform: platform });
+    if (!res.plays.length) { toast('곡 목록을 한 줄에 한 곡씩 넣어 주세요'); return; }
+    var ds = aggregate(res.plays, 'paste', false, {
+      sources: [{ fileName: '붙여넣기 목록', platform: platform, plays: res.plays.length, kind: 'paste' }],
+      notes: res.bad ? [res.bad + '줄은 읽지 못했어요'] : [],
+      fileName: platformLabel(platform) + ' 붙여넣기'
+    });
+    if (state.dataset && !state.dataset.sample) {
+      ds = mergeDatasets(state.dataset, ds);
+    }
+    state.dataset = ds;
+    state.fromSeed = false;
+    state.activeMood = null;
+    saveJSON(KEY_DATASET, state.dataset);
+    renderAll();
+    toast(num(res.plays.length) + '곡을 붙여넣기로 읽었어요');
   }
 
   /* ============================================================
@@ -2442,7 +4015,7 @@
       if (!t) {
         t = idx[k] = {
           key: k, title: e.song, artist: e.artist || '', n: 0, w: 0, sumV: 0, sumA: 0,
-          moods: {}, quads: {}, slots: {}, ctx: {}, owners: {}, highN: 0,
+          moods: {}, quads: {}, slots: {}, ctx: {}, owners: {}, highN: 0, platforms: {},
           sumIntensity: 0, lastDate: e.date
         };
       }
@@ -2457,6 +4030,7 @@
       t.quads[q] = (t.quads[q] || 0) + w;
       if (e.slot) t.slots[e.slot] = (t.slots[e.slot] || 0) + w;
       ((e.contexts) || []).forEach(function (c) { t.ctx[c] = (t.ctx[c] || 0) + w; });
+      if (e.platform) t.platforms[e.platform] = (t.platforms[e.platform] || 0) + 1;
       t.owners[item.owner] = (t.owners[item.owner] || 0) + 1;
       if (e.date > t.lastDate) t.lastDate = e.date;
     });
@@ -2517,6 +4091,8 @@
     var ctx = topContext(t);
     if (ctx && CONTEXT_BY_ID[ctx]) out.push('주로 <b>' + esc(CONTEXT_BY_ID[ctx].label) + '</b> 때 들었어요');
     if (nowSlot && t.slots[nowSlot]) out.push('지금 시간대(' + SLOT_BY_ID[nowSlot].short + ')에 들은 기록 ' + Math.round(t.slots[nowSlot]) + '건');
+    var plats = Object.keys(t.platforms || {}).sort(function (x, y) { return t.platforms[y] - t.platforms[x]; }).slice(0, 2);
+    if (plats.length) out.push(plats.map(function (p) { return '<b>' + esc(platformLabel(p)) + '</b>'; }).join(' · ') + '에서 들은 곡');
     if (t.highN >= 2) out.push('확신도 ‘확실해요’ 기록 ' + t.highN + '건');
     if (goal === 'lift') out.push('지금보다 <b>밝고 힘 있는 쪽</b>으로 고른 곡이에요');
     if (goal === 'calm') out.push('지금보다 <b>차분한 쪽</b>으로 고른 곡이에요');
@@ -2566,6 +4142,7 @@
         '<span class="rec-score">' + t.display + '</span>' +
       '</div>' +
       '<div class="recmeter"><i style="width:' + Math.max(4, t.display) + '%"></i></div>' +
+      (Object.keys(t.platforms || {}).length ? '<div class="pchips">' + Object.keys(t.platforms).sort(function (x, y) { return t.platforms[y] - t.platforms[x]; }).slice(0, 3).map(function (p) { return platformChip(p); }).join('') + '</div>' : '') +
       '<ul class="reasons">' + recReasons(t, null, state.recGoal, state._recSlot).map(function (r) { return '<li>' + r + '</li>'; }).join('') + '</ul>' +
       '<div class="data-row">' +
         '<button class="btn small" type="button" data-rec-song="' + esc(t.title) + '" data-rec-artist="' + esc(t.artist) + '">이 곡으로 기록 남기기</button>' +
@@ -2638,7 +4215,7 @@
         '<span class="card-desc" style="margin:0">' + (hasReal ? '내 기록' + (state.peers.length ? ' + 친구 ' + state.peers.length + '명' : '') : '샘플 기록으로 계산') + '</span></div>' +
       '<div class="recmap">지금 마음 <span class="tag">긍정도 ' + signed(va.v) + ' · 에너지 ' + signed(va.a) + '</span> → 목표 <span class="tag">' + signed(scored.target.v) + ' · ' + signed(scored.target.a) + '</span></div>' +
       (scored.tracks.length
-        ? '<p class="list-foot" style="margin:8px 0 0">라벨 붙은 ' + num(scored.tracks.length) + '곡 중에서 골랐어요. 점수는 목표와의 거리 60% + 기록의 두께 22% + 시간대·참여자 가점이에요.</p>'
+        ? '<p class="list-foot" style="margin:8px 0 0">라벨 붙은 ' + num(scored.tracks.length) + '곡 중에서 골랐어요.</p>'
         : '') +
     '</div>';
 
@@ -2686,20 +4263,30 @@
       axes: { valence: '긍정도 −1(불쾌) ~ +1(쾌)', arousal: '에너지 −1(이완) ~ +1(각성)' },
       quadrants: QUADS.map(function (q) { return { id: q.id, name: q.name, pair: q.pair, rule: q.desc }; }),
       moods: MOODS.map(function (m) { return { id: m.id, label: m.label, valence: m.v, arousal: m.a, quadrant: m.quad, definition: m.desc }; }),
+      submoods: SUBMOODS.map(function (s) {
+        return { id: s.id, label: s.label, family: s.family, familyLabel: SUB_FAMILY_BY_ID[s.family].label, parentMood: s.parent, valence: s.v, arousal: s.a, definition: s.desc };
+      }),
+      timeBands: TIME_BANDS.map(function (b) { return { id: b.id, label: b.label, hours: b.range, hoursList: b.hours }; }),
+      platforms: PLATFORMS.map(function (p) { return { id: p.id, label: p.label, files: p.files }; }),
+      platformsNote: 'platform은 그 곡을 들은 서비스다. 들어보기만 한 곡은 비어 있을 수 있다.',
+      entryStatus: { manual: '직접 기록', unconfirmed: '자동 초벌 분류(미확인)', confirmed: '들으면서 확인 완료' },
       contexts: CONTEXTS.map(function (c) { return { id: c.id, label: c.label }; }),
       slots: SLOTS.map(function (x) { return { id: x.id, label: x.label }; }),
       confidence: CONFS.map(function (c) { return { id: c.id, label: c.label, weight: c.w }; }),
       derivedFields: {
-        entryValence: '고른 감정들의 valence 평균',
-        entryArousal: '고른 감정들의 arousal 평균',
-        quadrant: 'valence·arousal 부호로 결정 (Q1 +v+a, Q2 −v+a, Q3 −v−a, Q4 +v−a)'
+        entryValence: '고른 세부 감정(없으면 감정)들의 valence 평균',
+        entryArousal: '고른 세부 감정(없으면 감정)들의 arousal 평균',
+        quadrant: 'valence·arousal 부호로 결정 (Q1 +v+a, Q2 −v+a, Q3 −v−a, Q4 +v−a)',
+        timeBand: '곡의 주요 청취 시각을 새벽/오전/오후/저녁 네 구간으로 나눈 값',
+        autoRule: '자동 초벌 분류가 어떤 규칙으로 붙었는지에 대한 설명'
       },
-      excluded: ['watch-history.json 원본', '실제 시청 시각', '곡 재생길이', '이메일·전화번호 등 계정 정보']
+      excluded: ['시청 기록 원본 파일', '실제 시청 시각 목록', '곡 재생길이', '이메일·전화번호 등 계정 정보']
     };
     if (withInstructions) {
       s.instructions = [
-        '참여자는 takeout의 watch-history.json을 올리거나, 직접 곡을 적어 기분을 남긴다.',
-        '각 기록마다 감정을 1개 이상 고르고, 강도(1–5)·맥락·확신도(3단계)를 함께 남긴다.',
+        '참여자는 YouTube Music(watch-history.json), Spotify, Apple Music(CSV·Library.xml), 또는 멜론·지니·FLO·벅스·바이브의 CSV·목록 붙여넣기로 청취 기록을 올린다.',
+        '올린 기록에서 곡별 감정을 자동 초벌 분류로 붙이고, 참여자가 들으면서 세부 감정을 목록을 고쳐 확정한다(상태: 미확인 → 확인 완료).',
+        '각 기록마다 감정을 1개 이상, 세부 감정(12개)은 원하는 만큼 고른다. 강도(1–5)·맥락·확신도(3단계)를 함께 남긴다.',
         '기분 기록은 누가·언제·어떤 상황에서 그 곡을 그 기분으로 들었는지에 대한 자기보고(self-report)다.',
         '연구 데이터 탭에서 JSON/CSV로 내보내면 위 항목만 남고, 메모는 기본으로 빠진다.',
         '여러 참여자 파일을 모아 사분면·감정 분포와 곡별 감정 좌표를 계산해 추천에 쓴다.'
@@ -2717,18 +4304,27 @@
       participant: e.participant || state.profile.code,
       date: e.date,
       slot: e.slot,
+      timeBand: e.timeBand || '',
+      peakHour: e.peakHour == null ? null : e.peakHour,
       song: e.song,
       artist: e.artist,
+      platform: e.platform || '',
       moods: e.moods.slice(),
       moodLabels: moodLabels(e),
+      submoods: (e.submoods || []).slice(),
+      submoodLabels: submoodLabels(e),
       quadrant: quadOf(va.v, va.a),
       valence: round2(va.v),
       arousal: round2(va.a),
       intensity: e.intensity,
       confidence: e.confidence,
       confidenceWeight: confidenceWeight(e),
-      contexts: (e.contexts || []).slice()
+      contexts: (e.contexts || []).slice(),
+      status: entryStatus(e)
     };
+    if (e.plays) out.plays = e.plays;
+    if (e.auto) out.autoTagged = true;
+    if (e.auto && e.autoRule) out.autoRule = e.autoRule;
     if (includeMemo && e.memo) out.memo = e.memo;
     return out;
   }
@@ -2755,14 +4351,16 @@
     var entries = realEntries(state.entries);
     if (!entries.length) { toast('내보낼 기록이 없어요 — 먼저 기분을 남겨 주세요'); return; }
     var includeMemo = !!(document.getElementById('expMemo') && document.getElementById('expMemo').checked);
-    var head = ['participant', 'date', 'slot', 'song', 'artist', 'mood_ids', 'mood_labels', 'quadrant', 'valence', 'arousal', 'intensity', 'confidence', 'confidence_weight', 'contexts'];
+    var head = ['participant', 'date', 'slot', 'time_band', 'peak_hour', 'song', 'artist', 'platform', 'mood_ids', 'mood_labels', 'submood_ids', 'submood_labels', 'quadrant', 'valence', 'arousal', 'intensity', 'confidence', 'confidence_weight', 'contexts', 'plays', 'status'];
     if (includeMemo) head.push('memo');
     var rows = [head.join(',')];
     entries.forEach(function (e) {
       var x = exportEntry(e, includeMemo);
       var line = [
-        x.participant, x.date, x.slot, x.song, x.artist, x.moods.join('|'), x.moodLabels.join('|'),
-        x.quadrant, x.valence, x.arousal, x.intensity, x.confidence, x.confidenceWeight, x.contexts.join('|')
+        x.participant, x.date, x.slot, x.timeBand, x.peakHour == null ? '' : x.peakHour,
+        x.song, x.artist, x.platform, x.moods.join('|'), x.moodLabels.join('|'),
+        x.submoods.join('|'), x.submoodLabels.join('|'), x.quadrant, x.valence, x.arousal,
+        x.intensity, x.confidence, x.confidenceWeight, x.contexts.join('|'), x.plays || '', x.status
       ];
       if (includeMemo) line.push(x.memo || '');
       rows.push(line.map(csvCell).join(','));
@@ -2773,7 +4371,7 @@
 
   function exportCodebook() {
     downloadText('mmj-codebook.json', JSON.stringify(labelSchema(true), null, 2));
-    toast('라벨 기준(코드북)을 내보냈어요');
+    toast('항목 설명을 내보냈어요');
   }
 
   function simpleHash(str) {
@@ -2877,9 +4475,9 @@
     var lib = SAMPLE_LIBRARY;
     function pick(i) { return lib[i % lib.length]; }
     var specs = [
-      { code: 'p_demo_1', nickname: '예시 참여자 A', base: 3, moods: [['calm', 'soft'], ['blue'], ['happy', 'calm']], ctx: [['study'], ['sleep'], ['move']] },
-      { code: 'p_demo_2', nickname: '예시 참여자 B', base: 9, moods: [['flutter', 'happy'], ['focus'], ['angry']], ctx: [['people'], ['study'], ['workout']] },
-      { code: 'p_demo_3', nickname: '예시 참여자 C', base: 17, moods: [['tired', 'blue'], ['calm'], ['focus', 'happy']], ctx: [['work'], ['rest'], ['alone']] }
+      { code: 'p_demo_1', nickname: '예시 A', base: 3, moods: [['calm', 'soft'], ['blue'], ['happy', 'calm']], ctx: [['study'], ['sleep'], ['move']] },
+      { code: 'p_demo_2', nickname: '예시 B', base: 9, moods: [['flutter', 'happy'], ['focus'], ['angry']], ctx: [['people'], ['study'], ['workout']] },
+      { code: 'p_demo_3', nickname: '예시 C', base: 17, moods: [['tired', 'blue'], ['calm'], ['focus', 'happy']], ctx: [['work'], ['rest'], ['alone']] }
     ];
     var made = 0;
     specs.forEach(function (sp, si) {
@@ -2907,7 +4505,7 @@
     saveJSON(KEY_PEERS, state.peers);
     renderData();
     renderRecommendResults();
-    toast(made ? '예시 참여자 데이터를 넣었어요' : '예시 참여자가 이미 들어 있어요');
+    toast(made ? '예시 기록 3명을 넣었어요' : '예시 기록이 이미 들어 있어요');
   }
 
   function collectAll() {
@@ -2941,7 +4539,7 @@
   function renderDataStats() {
     var col = collectAll();
     var entries = col.entries;
-    var moodCount = {}, quadCount = {}, slotCount = {}, ctxCount = {};
+    var moodCount = {}, quadCount = {}, slotCount = {}, ctxCount = {}, subCount = {}, platCount = {};
     var songKeys = {}, labels = 0, confSum = 0, intSum = 0, n = entries.length;
     entries.forEach(function (e) {
       labels += e.moods.length;
@@ -2949,6 +4547,8 @@
       confSum += confidenceWeight(e);
       intSum += e.intensity;
       e.moods.forEach(function (id) { moodCount[id] = (moodCount[id] || 0) + 1; });
+      (e.submoods || []).forEach(function (id) { subCount[id] = (subCount[id] || 0) + 1; });
+      if (e.platform) platCount[e.platform] = (platCount[e.platform] || 0) + 1;
       var va = entryVA(e);
       var q = quadOf(va.v, va.a);
       quadCount[q] = (quadCount[q] || 0) + 1;
@@ -2957,7 +4557,7 @@
     });
 
     var stats = [
-      { k: '참여자', v: col.people.length + '<small>명</small>', s: col.people.map(function (p) { return p.nickname || p.code; }).slice(0, 2).join(', ') },
+      { k: '사람', v: col.people.length + '<small>명</small>', s: col.people.map(function (p) { return p.nickname || p.code; }).slice(0, 2).join(', ') },
       { k: '기록', v: num(n) + '<small>건</small>', s: n ? '내 기록 ' + num(realEntries(state.entries).length) + '건 포함' : '' },
       { k: '감정 라벨', v: num(labels) + '<small>개</small>', s: n ? '기록당 ' + (Math.round(labels / n * 10) / 10) + '개' : '' },
       { k: '라벨 붙은 곡', v: num(Object.keys(songKeys).length) + '<small>곡</small>', s: n ? '평균 강도 ' + (Math.round(intSum / n * 10) / 10) + '/5' : '' }
@@ -2998,6 +4598,24 @@
         distRows(ctxCount, ctxMax, function (k) { return CONTEXT_BY_ID[k] ? (CONTEXT_BY_ID[k].emoji + ' ' + CONTEXT_BY_ID[k].label) : k; });
     }
 
+    var subMax = 1;
+    Object.keys(subCount).forEach(function (k) { if (subCount[k] > subMax) subMax = subCount[k]; });
+    var subBox = $('#subDist');
+    if (subBox) {
+      subBox.innerHTML = distRows(subCount, subMax, function (k) {
+        var s = SUBMOOD_BY_ID[k];
+        if (!s) return k;
+        return '<span style="font-size:10.5px;color:var(--muted)">' + esc(SUB_FAMILY_BY_ID[s.family].label) + '</span> ' + esc(s.label);
+      });
+    }
+
+    var platMax = 1;
+    Object.keys(platCount).forEach(function (k) { if (platCount[k] > platMax) platMax = platCount[k]; });
+    var platBox = $('#entryPlatformDist');
+    if (platBox) {
+      platBox.innerHTML = distRows(platCount, platMax, function (k) { return platformChip(k); });
+    }
+
     var table = $('#participantTable');
     if (table) {
       if (!col.people.length) {
@@ -3014,6 +4632,9 @@
           var m = top ? MOOD_BY_ID[top] : null;
           var avgInt = p.entries.reduce(function (s, e) { return s + e.intensity; }, 0) / p.entries.length;
           var avgConf = p.entries.reduce(function (s, e) { return s + confidenceWeight(e); }, 0) / p.entries.length;
+          var plats = {};
+          p.entries.forEach(function (e) { if (e.platform) plats[e.platform] = 1; });
+          var platNames = Object.keys(plats).map(function (k) { return platformShort(k); }).join(' · ') || '—';
           return '<tr><td class="nm">' + esc(p.nickname || p.code) + (p.mine ? ' <span style="color:var(--muted);font-size:10.5px">(나)</span>' : '') + '</td>' +
             '<td class="num">' + p.entries.length + '</td>' +
             '<td class="num">' + Object.keys(songN).length + '</td>' +
@@ -3021,17 +4642,18 @@
             '<td>' + (m ? m.emoji + ' ' + m.label : '-') + '</td>' +
             '<td class="num">' + (Math.round(avgInt * 10) / 10) + '</td>' +
             '<td class="num">' + (Math.round(avgConf * 100) / 100) + '</td>' +
+            '<td>' + esc(platNames) + '</td>' +
             '<td>' + (p.demo ? '예시' : p.mine ? '이 브라우저' : '친구 파일') + '</td></tr>';
         }).join('');
-        table.innerHTML = '<table class="dt"><thead><tr><th>참여자</th><th>기록</th><th>곡</th><th>라벨</th><th>대표 감정</th><th>평균 강도</th><th>확신도</th><th>출처</th></tr></thead><tbody>' + body + '</tbody></table>';
+        table.innerHTML = '<table class="dt"><thead><tr><th>사람</th><th>기록</th><th>곡</th><th>감정</th><th>대표 감정</th><th>평균 강도</th><th>확신도</th><th>플랫폼</th><th>출처</th></tr></thead><tbody>' + body + '</tbody></table>';
       }
     }
 
     var note = $('#dataNote');
     if (note) {
       note.textContent = n
-        ? '평균 확신도 가중치 ' + (Math.round(confSum / n * 100) / 100) + ' (1.0 = 모두 ‘확실해요’). 예시 참여자는 통계 연습용이라 내보내기에 포함되지 않아요.'
-        : '기분을 기록하거나 친구 파일을 불러오면 여기에 통계가 쌓입니다.';
+        ? '확신도 평균 ' + (Math.round(confSum / n * 100) / 100) + ' (1.0 = 모두 ‘확실해요’)'
+        : '곱과 마음을 남기면 여기에 통계가 쌓입니다.';
     }
   }
 
@@ -3040,7 +4662,7 @@
     var note = $('#peerNote');
     if (!box) return;
     if (!state.peers.length) {
-      box.innerHTML = '<div class="empty" style="padding:16px">아직 불러온 파일이 없어요.<br>친구가 보낸 JSON을 고르면 참여자별로 나눠 담습니다.</div>';
+      box.innerHTML = '<div class="empty" style="padding:16px">아직 불러온 파일이 없어요.<br>친구가 보낸 파일을 고르면 사람별로 나눠 담습니다.</div>';
     } else {
       box.innerHTML = state.peers.map(function (p, i) {
         return '<div class="peer"><span class="nm">' + esc(p.nickname || p.code) + '</span>' +
@@ -3063,7 +4685,7 @@
     });
     if (note) {
       note.textContent = state.peers.length
-        ? '불러온 파일은 이 브라우저에만 저장됩니다. 내 연구 기록으로 다시 내보내지지 않아요 — 참여자마다 자기 파일을 따로 보내야 해요.'
+        ? '불러온 파일은 이 브라우저에만 저장돼요. 내보내기에는 포함되지 않으니 사람마다 자기 파일을 따로 보내야 해요.'
         : '';
     }
   }
@@ -3073,13 +4695,13 @@
     if (!box) return;
     var rows = MOODS.map(function (m) {
       var q = QUAD_BY_ID[m.quad];
-      return '<tr><td class="nm">' + m.emoji + ' ' + m.label + '</td>' +
-        '<td>' + m.quad + ' ' + q.name + '</td>' +
-        '<td class="num">' + signed(m.v) + '</td>' +
-        '<td class="num">' + signed(m.a) + '</td>' +
-        '<td>' + esc(m.desc) + '</td></tr>';
+      return '<tr><td class="nm" data-th="감정">' + m.emoji + ' ' + m.label + '</td>' +
+        '<td data-th="사분면">' + m.quad + ' ' + q.name + '</td>' +
+        '<td class="num" data-th="긍정도">' + signed(m.v) + '</td>' +
+        '<td class="num" data-th="에너지">' + signed(m.a) + '</td>' +
+        '<td data-th="정의">' + esc(m.desc) + '</td></tr>';
     }).join('');
-    box.innerHTML = '<table class="dt"><thead><tr><th>감정</th><th>사분면</th><th>긍정도</th><th>에너지</th><th>정의</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    box.innerHTML = '<table class="dt stack"><thead><tr><th>감정</th><th>사분면</th><th>긍정도</th><th>에너지</th><th>정의</th></tr></thead><tbody>' + rows + '</tbody></table>';
   }
 
   function renderContextTable() {
@@ -3098,14 +4720,14 @@
     var box = $('#dsTable');
     if (!box) return;
     var rows = DATASETS.map(function (d) {
-      return '<tr><td class="nm"><a href="' + d.url + '" target="_blank" rel="noopener">' + esc(d.name) + '</a></td>' +
-        '<td class="num">' + esc(d.year) + '</td>' +
-        '<td>' + esc(d.size) + '</td>' +
-        '<td>' + esc(d.labels) + '</td>' +
-        '<td>' + esc(d.kind) + '</td>' +
-        '<td>' + esc(d.note) + '</td></tr>';
+      return '<tr><td class="nm" data-th="데이터"><a href="' + d.url + '" target="_blank" rel="noopener">' + esc(d.name) + '</a></td>' +
+        '<td class="num" data-th="연도">' + esc(d.year) + '</td>' +
+        '<td data-th="규모">' + esc(d.size) + '</td>' +
+        '<td data-th="라벨">' + esc(d.labels) + '</td>' +
+        '<td data-th="성격">' + esc(d.kind) + '</td>' +
+        '<td data-th="비고">' + esc(d.note) + '</td></tr>';
     }).join('');
-    box.innerHTML = '<table class="dt"><thead><tr><th>데이터셋</th><th>연도</th><th>규모</th><th>라벨 방식</th><th>성격</th><th>비고</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    box.innerHTML = '<table class="dt stack"><thead><tr><th>데이터셋</th><th>연도</th><th>규모</th><th>라벨 방식</th><th>성격</th><th>비고</th></tr></thead><tbody>' + rows + '</tbody></table>';
   }
 
   function renderProfile() {
@@ -3117,8 +4739,8 @@
     if (sn) sn.checked = !!state.profile.shareNickname;
     var note = $('#exportNote');
     if (note) {
-      note.innerHTML = '<b>나가는 것</b> — 참여자 코드 · 날짜 · 시간대 · 곡명 · 아티스트 · 감정 라벨 · 긍정도/에너지 · 강도 · 확신도 · 맥락<br>' +
-        '<b>안 나가는 것</b> — watch-history.json 원본, 실제 시청 시각, 곡 재생 길이, 브라우저에 저장된 다른 기록, 한 줄 메모(체크해야 포함), 샘플 기록';
+      note.innerHTML = '<b>담기는 것</b> — 코드 · 날짜 · 시간대 · 곡 · 아티스트 · 감정 · 강도 · 확신도 · 맥락 · 플랫폼<br>' +
+        '<b>빠지는 것</b> — 시청 기록 원본, 재생 시각, 메모(체크해야 포함), 샘플 기록';
     }
   }
 
@@ -3136,7 +4758,7 @@
      ============================================================ */
   function switchTab(name) {
     state.activeTab = name;
-    ['analyze', 'record', 'collection', 'recommend', 'data'].forEach(function (t) {
+    ['analyze', 'record', 'review', 'collection', 'recommend', 'data'].forEach(function (t) {
       var tab = $('#tab-' + t);
       var view = $('#view-' + t);
       if (!tab || !view) return;
@@ -3146,6 +4768,7 @@
     });
     if (name === 'collection') renderCollection();
     if (name === 'record') { renderQuickSongs(); renderTimeline(); }
+    if (name === 'review') renderReview();
     if (name === 'recommend') renderRecommend();
     if (name === 'data') renderData();
     var tabsEl = $('.tabs');
@@ -3159,7 +4782,10 @@
     renderHero();
     renderIntake();
     renderDashboard();
+    renderBandAnalysis();
+    renderPlatformDist();
     renderTimeline();
+    renderReview();
     renderCollection();
     renderStorageNote();
     renderSongDatalist();
@@ -3216,6 +4842,14 @@
       state.dataset = ds;
     }
 
+    /* 사이트에 기본으로 실린 기록(사이트 주인이 공개한 음악 기록)은 저장된 것이 없을 때만 쓴다 */
+    var seed = window.__MMJ_SEED__ || null;
+    if (!state.entries.length && !state.dataset && seed) {
+      if (Array.isArray(seed.entries)) state.entries = seed.entries.map(function (e) { return normalizeEntry(e); });
+      if (seed.dataset) state.dataset = seed.dataset;
+      state.fromSeed = true;
+    }
+
     // 날짜 기본값
     $('#fDate').value = todayYMD();
 
@@ -3241,8 +4875,24 @@
 
     // 파일 업로드
     $('#fileInput').addEventListener('change', function (e) {
-      var f = e.target.files && e.target.files[0];
-      handleFile(f);
+      var files = e.target.files ? Array.prototype.slice.call(e.target.files) : [];
+      handleFiles(files, state.mergeMode ? 'merge' : 'replace');
+      e.target.value = '';
+    });
+
+    // 초벌 분류 · 들으면서 정리
+    var autoTag = $('#autoTagBtn');
+    if (autoTag) autoTag.addEventListener('click', function () {
+      if (state.entries.length && !window.confirm('지금 기록이 ' + num(state.entries.length) + '개 있어요.\n시청 기록에서 곡별 초벌 분류를 더 만들까요? (이미 기록된 곡은 건드리지 않아요)')) return;
+      autoTagDataset();
+    });
+    var reviewAllBtn = $('#reviewAllBtn');
+    if (reviewAllBtn) reviewAllBtn.addEventListener('click', function () {
+      state.reviewAll = true; state.reviewIndex = 0; renderReview();
+    });
+    var reviewUnconfBtn = $('#reviewUnconfirmedBtn');
+    if (reviewUnconfBtn) reviewUnconfBtn.addEventListener('click', function () {
+      state.reviewAll = false; state.reviewIndex = 0; renderReview();
     });
     $('#goRecordBtn').addEventListener('click', function () { switchTab('record'); });
     var importEmpty = $('#importBtnEmpty');

@@ -1,0 +1,6 @@
+[
+  {"header":"YouTube Music","title":"Watched 새벽의 온도","titleUrl":"https://music.youtube.com/watch?v=aaaa1111","subtitles":[{"name":"서하 - Topic","url":"https://www.youtube.com/channel/UCaaaa"}],"time":"2026-03-02T23:41:00.000Z","products":["YouTube"],"activityControls":["YouTube 기록"]},
+  {"header":"YouTube Music","title":"Watched Night Bus","titleUrl":"https://music.youtube.com/watch?v=bbbb2222","subtitles":[{"name":"문라이트 클럽 - Topic","url":"https://www.youtube.com/channel/UCbbbb"}],"time":"2026-03-03T02:12:31.000Z","products":["YouTube"],"activityControls":["YouTube 기록"]},
+  {"header":"YouTube","title":"Watched 자바스크립트 1시간 강의","titleUrl":"https://www.youtube.com/watch?v=cccc3333","subtitles":[{"name":"코딩 채널","url":"https://www.youtube.com/channel/UCcccc"}],"time":"2026-03-03T10:05:00.000Z","products":["YouTube"],"activityControls":["YouTube 기록"]},
+  {"header":"YouTube Music","title":"Listened to Honey Tea","titleUrl":"https://music.youtube.com/watch?v=dddd4444","subtitles":[{"name":"코튼 캔디 - Topic","url":"https://www.youtube.com/channel/UCdddd"}],"time":"2026-03-04T18:20:00.000Z","products":["YouTube"],"activityControls":["YouTube 기록"]}
+]

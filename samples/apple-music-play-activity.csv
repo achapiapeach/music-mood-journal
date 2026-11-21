@@ -1,0 +1,6 @@
+Apple Id Number,Event Start Timestamp,Event End Timestamp,Event Type,Event Reason Hint Type,Item Type,Item Title,Container Type,Container Title,Play Duration Milliseconds,Device Type,Device Identifier,Song Name,Artist Name,Album Name,Track Number,Genre,Media Duration In Milliseconds
+10001,2026-03-02T23:41:00Z,2026-03-02T23:44:35Z,PLAY_END,TRACK_COMPLETE,Song,새벽의 온도,Album,새벽의 방,215000,iPhone,iPhone14,새벽의 온도,서하,새벽의 방,1,인디,215000
+10002,2026-03-03T02:10:00Z,2026-03-03T02:10:12Z,PLAY_END,SKIP_FORWARD,Song,Night Bus,Album,도시의 밤,12000,iPhone,iPhone14,Night Bus,문라이트 클럽,도시의 밤,2,인디,198000
+10003,2026-03-03T02:11:00Z,2026-03-03T02:14:18Z,PLAY_END,TRACK_COMPLETE,Song,Night Bus,Album,도시의 밤,198000,iPhone,iPhone14,Night Bus,문라이트 클럽,도시의 밤,2,인디,198000
+10004,2026-03-03T02:14:18Z,2026-03-03T02:14:19Z,PLAY_START,,Song,Night Bus,Album,도시의 밤,,iPhone,iPhone14,Night Bus,문라이트 클럽,도시의 밤,2,인디,198000
+10005,2026-03-04T18:20:00Z,2026-03-04T18:23:44Z,PLAY_END,TRACK_COMPLETE,Song,Honey Tea,Album,달콤한 오후,224000,iPhone,iPhone14,Honey Tea,코튼 캔디,달콤한 오후,3,인디,224000
