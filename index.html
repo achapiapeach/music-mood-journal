@@ -1977,9 +1977,10 @@
       var tbl = recordsToTable(list);
       var guess = guessMapping(tbl.header);
       if (guess.title == null) throw new Error('NOT_RECORDS');
-      var res = playsFromTable(tbl, guess, platformFromText(name) || 'other');
+      var jp = platformFromText(name) || 'other';
+      var res = playsFromTable(tbl, guess, jp);
       res.table = tbl; res.mapping = guess; res.fileKind = 'json_table';
-      res.needsMapping = !confidentMapping(tbl.header, guess, 2);
+      res.needsMapping = !confidentMapping(tbl.header, guess, 2) || jp === 'other';
       return res;
     }
 
@@ -2004,7 +2005,7 @@
     out.table = { header: header, rows: body };
     out.mapping = mapping;
     out.fileKind = 'csv';
-    out.needsMapping = !confidentMapping(header, mapping, 3);
+    out.needsMapping = !confidentMapping(header, mapping, 3) || platformHint === 'other';
     return out;
   }
 
@@ -2452,7 +2453,10 @@
     return '<div class="notebox" style="margin-top:14px;border-color:var(--accent)">' +
       '<b>열 지정이 필요해요</b> — <b>' + esc(q.fileName) + '</b>의 어느 열이 곡명·아티스트·날짜인지 확인해 주세요. 자동으로 맞춘 값이 먼저 들어가 있어요.' +
       prev +
-      '<div class="mapgrid">' + selects + '</div>' +
+      '<div class="mapgrid">' + selects +
+        '<div class="field" style="margin-bottom:4px"><label for="mapPlatform">어디서 들었나요</label>' +
+        platformSelectHTML('mapPlatform', q.platform || 'other') + '</div>' +
+      '</div>' +
       '<div class="data-row" style="margin-top:10px">' +
         '<button class="btn small primary" type="button" id="mapRun">이 설정으로 분석하기</button>' +
         '<button class="btn small" type="button" id="mapSkip">이 파일 건너뛰기</button>' +
@@ -2498,9 +2502,10 @@
       '<div class="btn-row" style="justify-content:flex-end">' +
         (ds.sample ? '<button class="btn small" type="button" id="clearSampleBtn">샘플 지우기</button>' : '') +
         (state.fromSeed ? '<button class="btn small" type="button" id="clearSeedBtn">기본 기록 지우기</button>' : '') +
+        '<button class="btn small" type="button" id="pasteOpenBtn">목록 붙여넣기</button>' +
         '<button class="btn small" type="button" id="mergeFileBtn">다른 플랫폼 기록 더하기</button>' +
         '<button class="btn small" type="button" id="pickFileBtn">새로 올리기</button>' +
-      '</div>' + map;
+      '</div>' + pastePanelHTML() + map;
     bindIntake();
   }
 
@@ -2584,7 +2589,8 @@
         if (sel.value !== '') mapping[sel.getAttribute('data-role')] = Number(sel.value);
       });
       if (mapping.title == null) { toast('곡명 열을 골라 주세요'); return; }
-      var res = playsFromTable(q.table, mapping, q.platform || 'other');
+      var selPlat = $('#mapPlatform');
+      var res = playsFromTable(q.table, mapping, (selPlat && selPlat.value) || q.platform || 'other');
       state.mapping = null;
       absorb(q.fileName, res);
       processQueue();
@@ -2601,12 +2607,13 @@
     var ds = state.dataset;
     var topArtist = ds.artists && ds.artists[0];
     var topTrack = ds.tracks && ds.tracks[0];
-    var peakCount = ds.hours[ds.topHour];
-    var pct = ds.plays ? Math.round(peakCount / ds.plays * 100) : 0;
+    var hasTime = !!ds.exactPlays;
+    var peakCount = hasTime ? ds.hours[ds.topHour] : 0;
+    var pct = hasTime && ds.plays ? Math.round(peakCount / ds.plays * 100) : 0;
     var stats = [
       { k: '전체 재생', v: num(ds.plays) + '<small>회</small>', s: ds.days ? ds.days + '일 동안' : '' },
       { k: '고유한 곡', v: num(ds.uniqueTracks) + '<small>곡</small>', s: topTrack ? '1위 ' + topTrack.title : '' },
-      { k: '최다 청취 시간', v: hourLabel(ds.topHour), s: num(peakCount) + '회 · ' + pct + '%' },
+      { k: '최다 청취 시간', v: hasTime ? hourLabel(ds.topHour) : '—', s: hasTime ? num(peakCount) + '회 · ' + pct + '%' : '재생 시각 없음' },
       { k: '최다 아티스트', v: esc(topArtist ? topArtist.name : '-'), s: topArtist ? num(topArtist.count) + '회 · ' + topArtist.tracks + '곡' : '' }
     ];
     $('#stats').innerHTML = stats.map(function (s) {
@@ -2618,6 +2625,18 @@
 
   function renderHourChart() {
     var ds = state.dataset;
+    var chartEl = $('#hoursChart');
+    var axisEl = $('#hoursAxis');
+    if (!ds.exactPlays) {
+      chartEl.innerHTML = '';
+      axisEl.innerHTML = '';
+      chartEl.style.display = 'none';
+      axisEl.style.display = 'none';
+      $('#hoursNote').innerHTML = '이 파일에는 <strong>재생 시각이 없어</strong> 시간대를 계산할 수 없어요. 일별 트랙 파일이나 보관함 파일을 쓰면 날짜만 담겨서 그래요.';
+      return;
+    }
+    chartEl.style.display = '';
+    axisEl.style.display = '';
     var max = Math.max.apply(null, ds.hours);
     if (!max) max = 1;
     var html = '';
@@ -3591,7 +3610,7 @@
 
     var note = $('#bandNote');
     if (note) {
-      note.textContent = '새벽(00–05시)에 들은 곡은 슬픔·잠 쪽으로 기울기 쉬워, 초벌 분류도 새벽 비중이 45%를 넘으면 그쪽으로 보정합니다. 시간대는 곡별 주요 청취 시각으로 계산해요.';
+    $('#bandNote').textContent = '새벽(00–05시)이 그 곡을 가장 많이 들은 시간대이고 2회 이상 들었으면, 초벌 분류에서 슬픔·먹먹함(새벽) 쪽으로 보정합니다. 시간대는 곡별 주요 청취 시각으로 계산해요.';
     }
   }
 
